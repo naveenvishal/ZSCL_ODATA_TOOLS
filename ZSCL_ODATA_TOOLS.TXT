@@ -1,0 +1,2964 @@
+class ZSCL_ODATA_TOOLS definition
+  public
+  final
+  create public .
+
+public section.
+
+  types:
+    ty_t_mgw_request type table of ref to /iwbep/cl_mgw_request .
+  types:
+    begin of ty_s_nav_prop,
+        principal_entity    type string,
+        principal_property  type string,
+        principal_structure type string,
+        principal_field     type fieldname,
+        dependent_entity    type string,
+        dependent_property  type string,
+        dependent_structure type string,
+        dependent_field     type fieldname,
+      end of ty_s_nav_prop .
+  types:
+    ty_t_nav_prop type table of ty_s_nav_prop .
+
+  constants GC_MAX_HITS type INT4 value 1000 ##NO_TEXT.
+
+  class-methods ADD_MESSAGE_TO_HEADER
+    importing
+      !IO_SRV_RUNTIME type ref to /IWBEP/IF_MGW_CONV_SRV_RUNTIME .
+  class-methods CONVERT_EXPAND_TO_FILTER
+    importing
+      !IO_REQUEST_EXP type ref to /IWBEP/CL_MGW_REQUEST
+      !IV_ENTITY_TYPE_A type STRING
+      !IV_ENTITY_TYPE_B type STRING
+      !IS_ENTITY_A type ANY
+      !IO_MODEL type ref to /IWBEP/CL_MGW_ODATA_MODEL optional
+    returning
+      value(RV_REQUEST_FILTER) type ref to /IWBEP/CL_MGW_REQUEST
+    raising
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  class-methods CONVERT_EXPAND_TO_FILTER_MUL
+    importing
+      !IO_REQUEST_EXP type ref to /IWBEP/CL_MGW_REQUEST
+      !IV_ENTITY_TYPE_A type STRING
+      !IV_ENTITY_TYPE_B type STRING
+      !IT_DATA type STANDARD TABLE
+      !IO_MODEL type ref to /IWBEP/IF_MGW_ODATA_FW_MODEL optional
+    exporting
+      !ES_NAV_PROP type TY_S_NAV_PROP
+      value(ET_REQUEST_FILTER) type TY_T_MGW_REQUEST
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  class-methods CONVERT_SELECT_OPTIONS
+    importing
+      !IV_NAME type CDSVIEW_SOURCE optional
+      !IV_STRUCTURE type ANY optional
+    changing
+      !CT_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION optional
+      !CT_FILTER_EXPRESSIONS type /IWBEP/IF_MGW_CORE_SRV_RUNTIME=>TT_EXPRESSIONS optional
+    raising
+      resumable(/IWBEP/CX_MGW_BUSI_EXCEPTION) .
+  class-methods COPY_DATA_TO_REF
+    importing
+      !IS_DATA type ANY
+    changing
+      !CR_DATA type ref to DATA .
+  class-methods EXPAND_GENERIC_ENTITY_SET
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+      !IO_EXPAND_NODE type ref to /IWBEP/CL_MGW_EXPAND_NODE
+      !IO_DATA_PROVIDER type ref to /IWBEP/IF_MGW_APPL_SRV_RUNTIME
+    changing
+      !CT_DATA type STANDARD TABLE
+      !CT_EXPANDED_PROPERTIES type STRING_TABLE
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  class-methods FETCH_CDS_DATA_BY_KEYS
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITYSET
+      !IV_CDS_VIEW type CDSVIEW_SOURCE optional
+      !IV_REMOVE_DUPLICATES type ABAP_BOOL default ABAP_FALSE
+    changing
+      !CT_ENTITY_SET type STANDARD TABLE
+      !CS_RESPONSE_CONTEXT type /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_CONTEXT
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION .
+  class-methods GET_CDS_DATA
+    importing
+      !IV_CDS_VIEW type CDSVIEW_SOURCE
+      !IT_FILTER_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION optional
+      !IV_FILTER_STRING type STRING optional
+      !IT_SELECT type STRING_TABLE optional
+      !IV_SELECT_KEYS type ABAP_BOOL optional
+      !IT_ORDER_BY type STRING_TABLE optional
+      !IV_MAX_HITS type MAX_HITS optional
+      !IV_DISTINCT type ABAP_BOOL default ABAP_TRUE
+      !IV_COUNT type ABAP_BOOL default ABAP_FALSE
+      !IV_DATA type ABAP_BOOL default ABAP_TRUE
+      !IV_SELECT_BY_KEYS type ABAP_BOOL default ABAP_FALSE
+    exporting
+      !EV_COUNT type INT4
+    changing
+      !CT_DATA type STANDARD TABLE
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION .
+  class-methods GET_CDS_ENTITY
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITY
+      !IV_CDS_VIEW type CDSVIEW_SOURCE optional
+    changing
+      !CS_ENTITY type ANY
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION .
+  class-methods GET_CDS_ENTITY_SET
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITYSET
+      !IV_CDS_VIEW type CDSVIEW_SOURCE optional
+      !IV_DISTINCT type ABAP_BOOL default ABAP_TRUE
+      !IT_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION optional
+    changing
+      !CT_ENTITY_SET type STANDARD TABLE
+      !CS_RESPONSE_CONTEXT type /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_CONTEXT
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION .
+  class-methods GET_CDS_KEYS
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITYSET
+      !IV_CDS_VIEW type CDSVIEW_SOURCE optional
+      !IT_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION optional
+    changing
+      !CT_ENTITY_SET type STANDARD TABLE
+      !CS_RESPONSE_CONTEXT type /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_CONTEXT
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION .
+  class-methods GET_CONVERTED_FILTER_STRING
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITYSET
+      !IV_CDS_NAME type CDSVIEW_SOURCE
+    returning
+      value(RV_FILTER_STRING) type STRING
+    raising
+      resumable(/IWBEP/CX_MGW_BUSI_EXCEPTION) .
+  class-methods GET_EXPANDED_ENTITYSET
+    importing
+      !IV_ENTITY_NAME type STRING
+      !IV_ENTITY_SET_NAME type STRING
+      !IV_SOURCE_NAME type STRING
+      !IT_FILTER_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION optional
+      !IT_ORDER type /IWBEP/T_MGW_SORTING_ORDER optional
+      !IS_PAGING type /IWBEP/S_MGW_PAGING optional
+      !IT_NAVIGATION_PATH type /IWBEP/T_MGW_NAVIGATION_PATH optional
+      !IT_KEY_TAB type /IWBEP/T_MGW_NAME_VALUE_PAIR optional
+      !IV_FILTER_STRING type STRING optional
+      !IV_SEARCH_STRING type STRING optional
+      !IO_EXPAND type ref to /IWBEP/IF_MGW_ODATA_EXPAND
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITYSET
+      !IO_DATA_PROVIDER type ref to /IWBEP/IF_MGW_APPL_SRV_RUNTIME
+    exporting
+      !ER_ENTITYSET type ref to DATA
+      !ET_EXPANDED_CLAUSES type STRING_TABLE
+      !ET_EXPANDED_TECH_CLAUSES type STRING_TABLE
+      !ES_RESPONSE_CONTEXT type /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_CONTEXT
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  class-methods GET_SERVICE_MODEL
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+    returning
+      value(RO_MODEL) type ref to /IWBEP/CL_MGW_ODATA_MODEL
+    raising
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  class-methods GET_SO_FROM_NAVIGATION
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+    returning
+      value(RT_SELECT_OPTIONS) type /IWBEP/T_MGW_SELECT_OPTION .
+  class-methods GET_TEXT_FROM_KEY
+    importing
+      !IV_OBJECT type TDOBJECT
+      !IV_NAME type TDOBNAME
+      !IV_ID type TDID
+      !IV_SPRAS type SPRAS
+    returning
+      value(EV_TEXT) type STRING_UNICODE .
+  class-methods IMPLEMENT_FILTERING
+    importing
+      !IT_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION
+    changing
+      !CT_DATA type STANDARD TABLE
+    raising
+      resumable(/IWBEP/CX_MGW_BUSI_EXCEPTION) .
+  class-methods IMPLEMENT_ORDERBY
+    importing
+      !IT_ORDER type /IWBEP/T_MGW_SORTING_ORDER optional
+      !IT_ORDER_TECH type /IWBEP/T_MGW_TECH_ORDER optional
+    changing
+      !CT_DATA type STANDARD TABLE .
+  class-methods IMPLEMENT_PAGING
+    importing
+      !IS_PAGING type /IWBEP/S_MGW_PAGING
+    changing
+      !CT_DATA type STANDARD TABLE .
+  class-methods IS_FIELD_REQUESTED
+    importing
+      !IV_FIELD type STRING optional
+      !IT_FIELDS type STRING_TABLE optional
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+    returning
+      value(RV_OK) type ABAP_BOOL .
+  class-methods RAISE_EXCEPTION
+    importing
+      !IV_BUSI type ABAP_BOOL default ABAP_TRUE
+      !IV_TECH type ABAP_BOOL default ABAP_FALSE
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+protected section.
+
+  class-methods BUILD_ORDER_BY_TABLE
+    importing
+      !IV_CDS_VIEW type CDSVIEW_SOURCE
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+    returning
+      value(RT_ORDER_BY) type STRING_TABLE .
+  class-methods BUILD_SELECT_TABLE
+    importing
+      !IV_CDS_VIEW type CDSVIEW_SOURCE
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+      !IV_KEY_FIELDS_ONLY type ABAP_BOOL default ABAP_FALSE
+    returning
+      value(RT_SELECT) type STRING_TABLE .
+  class-methods BUILD_WHERE_TABLE
+    importing
+      !IV_CDS_VIEW type CDSVIEW_SOURCE
+      !IT_SELECT_OPTION type /IWBEP/T_MGW_SELECT_OPTION optional
+      !IV_FILTER_STRING type STRING optional
+      !IV_SELECT_BY_KEYS type ABAP_BOOL default ABAP_FALSE
+    returning
+      value(RT_WHERE) type STRING_TABLE .
+private section.
+
+  class-methods CHECK_FIELD_
+    importing
+      !IV_TABLE type STRING
+      !IV_FIELD type STRING
+    returning
+      value(RV_FIELD) type STRING .
+  class-methods CHECK_SELECT_
+    importing
+      !IV_TABLE type STRING
+      !IT_SELECT type STRING_TABLE
+    returning
+      value(RT_SELECT) type STRING_TABLE .
+  class-methods CHECK_TABLE_
+    importing
+      !IV_TABLE type STRING
+    returning
+      value(RV_TABLE) type STRING .
+  class-methods CONVERT_SO_DDIC_
+    importing
+      !IR_STRUCT_DESCR type ref to CL_ABAP_TYPEDESCR
+    changing
+      !CT_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION optional
+      !CT_FILTER_EXPRESSIONS type /IWBEP/IF_MGW_CORE_SRV_RUNTIME=>TT_EXPRESSIONS optional
+    raising
+      resumable(ZCX_ODATA_TOOLS) .
+  class-methods CONVERT_SO_FREE_
+    importing
+      !IR_STRUCT_DESCR type ref to CL_ABAP_TYPEDESCR
+    changing
+      !CT_SELECT_OPTIONS type /IWBEP/T_MGW_SELECT_OPTION optional
+      !CT_FILTER_EXPRESSIONS type /IWBEP/IF_MGW_CORE_SRV_RUNTIME=>TT_EXPRESSIONS optional
+    raising
+      resumable(ZCX_ODATA_TOOLS) .
+  class-methods DB_COUNT_
+    importing
+      !IT_FROM type STRING_TABLE
+      !IT_WHERE type STRING_TABLE
+    returning
+      value(RV_COUNT) type INT4
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION .
+  class-methods DB_SELECT_
+    importing
+      !IT_SELECT type STRING_TABLE optional
+      !IT_FROM type STRING_TABLE optional
+      !IT_WHERE type STRING_TABLE optional
+      !IT_ORDER_BY type STRING_TABLE optional
+      !IV_MAX_HITS type MAX_HITS default 100
+      !IV_COUNT type ABAP_BOOL default ABAP_FALSE
+      !IV_DATA type ABAP_BOOL default ABAP_TRUE
+      !IV_DISTINCT type ABAP_BOOL default ABAP_FALSE
+      !IV_SELECT_BY_KEYS type ABAP_BOOL default ABAP_FALSE
+    exporting
+      !EV_COUNT type INT4
+    changing
+      !CT_DATA type STANDARD TABLE
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      CX_SY_DYNAMIC_OSQL_ERROR .
+  class-methods DETERMINE_CDS_
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+    returning
+      value(RV_CDS_NAME) type CDSVIEW_SOURCE .
+  class-methods GET_KEY_FIELDS_
+    importing
+      !IV_CDS_VIEW type CDSVIEW_SOURCE
+    returning
+      value(RT_KEY_FIELDS) type STRING_TABLE .
+  class-methods REMOVE_DUPLICATES_BY_KEY_
+    importing
+      !IV_CDS_VIEW type CDSVIEW_SOURCE
+    changing
+      !CT_DATA type STANDARD TABLE
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION .
+  class-methods _GET_DDIC_STRUCTURE_FOR_ET_
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+      !IV_ENTITY_TYPE_NAME type STRING
+    returning
+      value(RV_STRUCTURE_NAME) type STRING
+    raising
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  class-methods _GET_ES_BY_ET_
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+      !IV_ET_NAME type STRING
+    returning
+      value(RV_ES_NAME) type STRING
+    raising
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  class-methods _GET_NAVIGATION_PROPERTIES_
+    importing
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/CL_MGW_REQUEST
+      !IV_PRINCIPAL_ET type STRING
+      !IV_DEPENDENT_ET type STRING
+    exporting
+      !ET_NAV_PROPS type TY_T_NAV_PROP
+    raising
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+ENDCLASS.
+
+
+
+CLASS ZSCL_ODATA_TOOLS IMPLEMENTATION.
+
+
+  method add_message_to_header.
+
+    data(lr_msg_cont) = io_srv_runtime->get_message_container( ).
+    check: lr_msg_cont is bound.
+
+    check: sy-msgid is not initial and
+           sy-msgty is not initial.
+
+    message id sy-msgid type sy-msgty number sy-msgno with sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 into data(lv_dummy).
+
+    lr_msg_cont->add_message( iv_msg_type               = sy-msgty
+                              iv_msg_id                 = sy-msgid
+                              iv_msg_number             = sy-msgno
+                              iv_msg_text               = conv #( lv_dummy )
+                              iv_add_to_response_header = abap_true ).
+
+  endmethod.
+
+
+  method build_order_by_table.
+
+    data: lv_string type string.
+
+    data(ls_details) = io_tech_request_context->get_request_details( ).
+
+    " If $orderby is not initial...
+    check: ls_details-technical_request-order[] is not initial.
+
+    loop at ls_details-technical_request-order into data(ls_order).
+
+      if check_field_( iv_table = conv #( iv_cds_view       )
+                       iv_field = conv #( ls_order-property ) ) is not initial.
+
+        translate ls_order-order to upper case.
+        case ls_order-order(3).
+          when 'DES'. ls_order-order = 'DESCENDING'.       "#EC NO_TEXT
+          when 'ASC'. ls_order-order = 'ASCENDING'.        "#EC NO_TEXT
+        endcase.
+
+        concatenate ls_order-property ls_order-order into lv_string separated by space.
+        translate lv_string to upper case.
+        append lv_string to rt_order_by[].
+      endif.
+    endloop.
+
+
+    " Add Commas Here...
+    loop at rt_order_by assigning field-symbol(<fs_order_by>).
+      if sy-tabix <> lines( rt_order_by[] ).
+        concatenate <fs_order_by> ',' into <fs_order_by> separated by space.
+      endif.
+    endloop.
+
+  endmethod.
+
+
+  method build_select_table.
+
+    data(ls_details) = io_tech_request_context->get_request_details( ).
+
+    if iv_key_fields_only = abap_true or
+       io_tech_request_context->/iwbep/if_mgw_req_entityset~has_count( ) = abap_true.
+      " Only Key Fields...
+      rt_select[] = get_key_fields_( iv_cds_view = iv_cds_view ).
+    else.
+      rt_select[] = ls_details-technical_request-select_strings[].
+    endif.
+
+    " If $select is not initial...
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if rt_select[] is not initial.
+
+      " Add Key Fields... Always... Otherwise, no sense...
+      loop at get_key_fields_( iv_cds_view = iv_cds_view ) into data(lv_key_field).
+        collect lv_key_field into rt_select[].
+      endloop.
+
+      " Add Sort Fields... Always... Otherwise, ABAP dump...
+      loop at ls_details-technical_request-order into data(ls_order).
+        collect conv string( ls_order-property ) into rt_select[].
+      endloop.
+    endif.
+
+    " Check Select...
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    rt_select   = check_select_( it_select = rt_select[]
+                                 iv_table  = conv #( iv_cds_view ) ).
+
+
+  endmethod.
+
+
+  method build_where_table.
+
+    data: lv_where     type string.
+    data: lt_ranges    type rsds_trange.
+    data: ls_range     type rsds_range.
+    data: lt_frange    type rsds_frange_t.
+    data: ls_frange    type rsds_frange.
+    data: lt_where     type rsds_twhere.
+    data: lt_parts     type string_table.
+    data: lt_parts_ok  type string_table.
+    data lv_whitelist  type string.
+    data lv_part_ok    type string.
+
+    " Check Table...
+    if check_table_( conv #( iv_cds_view ) ) is initial.
+      return.
+    endif.
+
+    " Read Data via Select Options...
+    if it_select_option[] is not initial.
+      loop at it_select_option into data(ls_so).
+
+        clear: lv_where, lt_ranges, ls_range, lt_frange, ls_frange, lt_where.
+
+        ls_frange-fieldname = ls_so-property.
+        move-corresponding: ls_so-select_options[] to ls_frange-selopt_t[].
+        " Conversion for ABAP and SQL Syntax...
+        loop at ls_frange-selopt_t[] assigning field-symbol(<fs_selopt>).
+          case to_upper( <fs_selopt>-option ).
+            when 'EQ'. <fs_selopt>-option = '='.
+            when 'GT'. <fs_selopt>-option = '>'.
+            when 'LT'. <fs_selopt>-option = '<'.
+            when 'GE'. <fs_selopt>-option = '>='.
+            when 'LE'. <fs_selopt>-option = '<='.
+            when 'NE'. <fs_selopt>-option = '<>'.
+          endcase.
+        endloop.
+        append ls_frange to lt_frange[].
+
+
+        ls_range-tablename  = iv_cds_view.
+        ls_range-frange_t[] = lt_frange[].
+        append ls_range to lt_ranges[].
+
+        " Check Field...
+        if check_field_( iv_table = conv #( iv_cds_view )
+                         iv_field = conv #( ls_frange-fieldname ) ) is initial.
+          continue.
+        endif.
+
+
+        " Needed to avoid ATC Check Prio 1...
+        call function 'FREE_SELECTIONS_RANGE_2_WHERE'
+          exporting
+            field_ranges  = lt_ranges
+          importing
+            where_clauses = lt_where.
+
+        loop at lt_where into data(ls_where).
+          loop at ls_where-where_tab into data(l_clause).
+            concatenate lv_where l_clause-line into lv_where separated by space.
+          endloop.
+        endloop.
+
+        condense lv_where.
+
+        if lv_where is not initial.
+
+          if rt_where[] is not initial.
+            append ' AND ' to rt_where[].
+          endif.
+
+          append lv_where to rt_where[].
+        endif.
+      endloop.
+    endif.
+
+
+    " Read Data via Filter String...
+    if iv_filter_string is not initial.
+      clear: lt_parts[], lv_where.
+      lv_where = iv_filter_string.
+      replace all occurrences of '(' in lv_where with '  (  '.
+      replace all occurrences of ')' in lv_where with '  )  '.
+      condense lv_where.
+
+      split lv_where at space into table lt_parts[].
+      clear: lv_where.
+
+
+      loop at lt_parts[] into data(lv_part).
+        try.
+            lv_whitelist = lv_part.
+            lv_part_ok = cl_abap_dyn_prg=>check_whitelist_str(
+                                    val       = lv_part
+                                    whitelist = lv_whitelist ).
+          catch cx_abap_not_in_whitelist.
+            assert 1 = 2.
+        endtry.
+        append lv_part_ok to lt_parts_ok.
+      endloop.
+
+      concatenate lines of lt_parts_ok into lv_where separated by space.
+      condense lv_where.
+
+      " Put all in brackets...
+      if not lv_where cp '(*)'.
+        concatenate '(' lv_where ')' into lv_where separated by space.
+      endif.
+
+      " Can be a Combination...
+      if rt_where[] is not initial.
+        append ' AND ' to rt_where[].
+      endif.
+
+      append lv_where to rt_where[].
+    endif.
+
+
+    " Select by Keys...
+    if iv_select_by_keys = abap_true.
+      data(lt_key_fields) = get_key_fields_( iv_cds_view ).
+      loop at lt_key_fields into data(lv_key_field).
+        clear: lv_where.
+        translate lv_key_field to lower case.
+
+        lv_where = |{ lv_key_field } = @ct_data-{ lv_key_field }|.   " CT_DATA is a constant !!!
+        if rt_where[] is not initial.
+          append ' AND ' to rt_where[].
+        endif.
+        append lv_where to rt_where[].
+      endloop.
+    endif.
+
+  endmethod.
+
+
+  method check_field_.
+
+    statics: sv_table type ddobjname,
+             st_dfies type table of dfies,
+             st_list  type string_hashed_table.
+
+
+    clear: rv_field.
+
+
+    if sv_table <> iv_table.
+
+      clear: sv_table, st_dfies[], st_list[].
+
+      sv_table = iv_table.
+
+      call function 'DDIF_NAMETAB_GET'
+        exporting
+          tabname   = sv_table
+        tables
+          dfies_tab = st_dfies
+        exceptions
+          not_found = 1
+          others    = 2.
+      if sy-subrc <> 0.
+        return.
+      endif.
+      loop at st_dfies into data(ls_dfies).
+        collect conv string( ls_dfies-fieldname ) into st_list[].
+      endloop.
+    endif.
+
+    try.
+        rv_field = cl_abap_dyn_prg=>check_whitelist_tab( val = iv_field whitelist = st_list ).
+      catch cx_abap_not_in_whitelist into data(lx_abap_not_in_whitelist).
+        return.
+    endtry.
+
+  endmethod.
+
+
+  method check_select_.
+
+    clear: rt_select[].
+
+    loop at it_select into data(lv_field).
+
+      lv_field = check_field_( iv_table = iv_table iv_field = lv_field ).
+      if lv_field is not initial.
+        append lv_field to rt_select[].
+      endif.
+    endloop.
+
+  endmethod.
+
+
+  method check_table_.
+
+    data: lt_whitelist       type string_hashed_table.
+    data: lt_packages        type string_hashed_table.
+
+    clear: rv_table.
+
+    check: iv_table(2) = 'ZS'
+       or  iv_table(3) = 'ZZS'
+       or  iv_table(5) = 'ZDMSH'
+       or  iv_table(2) = 'YS'.
+
+    try.
+        collect iv_table into lt_whitelist.
+        rv_table = cl_abap_dyn_prg=>check_whitelist_tab( val       = iv_table
+                                                         whitelist = lt_whitelist ).
+      catch cx_abap_not_in_whitelist.
+        return.
+    endtry.
+
+    try.
+        clear: lt_packages.
+        rv_table = cl_abap_dyn_prg=>check_table_name_tab(  val      = iv_table
+                                                           packages = lt_packages ).
+      catch cx_abap_not_a_table.
+        return.                              " Check for existance...
+      catch cx_abap_not_in_package.
+        "return.                             " Check for package is not relevent...
+    endtry.
+
+
+
+  endmethod.
+
+
+  method convert_expand_to_filter.
+
+    data: lo_request_context      type ref to /iwbep/cl_mgw_request.
+    data: ls_request              type /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+    data: ls_request_new          type /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+    data: lr_request              type ref to /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+
+
+    field-symbols:
+          <ls_request>            type /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+
+    define: _move.
+      ls_request_new-&1 = ls_request-&1.
+    end-of-definition.
+
+    " Get Request Data...
+    ls_request = io_request_exp->get_request_details( ).
+
+    data(lv_entity_set_a) = _get_es_by_et_( io_tech_request_context = io_request_exp iv_et_name = iv_entity_type_a ).
+    data(lv_entity_set_b) = _get_es_by_et_( io_tech_request_context = io_request_exp iv_et_name = iv_entity_type_b ).
+
+    " Check Navigation Properties...
+    call method _get_navigation_properties_
+      exporting
+        io_tech_request_context = io_request_exp
+        iv_principal_et         = iv_entity_type_a
+        iv_dependent_et         = iv_entity_type_b
+      importing
+        et_nav_props            = data(lt_nav_props).
+    if lt_nav_props[] is initial.
+      return.
+    endif.
+
+
+
+    " Copy Technical Details...
+    _move: service_doc_name, namespace, version, cache_timestamp, base_url,
+           http_method, icf_root_node, system_alias_info, context_params,
+           format, type, operation, incoming_message.
+
+    " Set Source and Target Properties...
+    ls_request_new-source_entity     = iv_entity_type_b.
+    ls_request_new-target_entity     = iv_entity_type_b.
+    ls_request_new-source_entity_set = lv_entity_set_b.
+    ls_request_new-source_entity_set = lv_entity_set_b.
+
+    ls_request_new-technical_request-service_name       = ls_request_new-service_doc_name.
+    ls_request_new-technical_request-service_version    = ls_request_new-version.
+    ls_request_new-technical_request-source_entity_type = ls_request_new-source_entity.
+    ls_request_new-technical_request-target_entity_type = ls_request_new-target_entity.
+    ls_request_new-technical_request-source_entity_set  = ls_request_new-source_entity_set.
+    ls_request_new-technical_request-target_entity_set  = ls_request_new-target_entity_set.
+    ls_request_new-technical_request-request_header     = ls_request-technical_request-request_header.
+
+    " Filter Tabs...
+    loop at lt_nav_props assigning field-symbol(<fs_nav_prop>).
+
+      assign component <fs_nav_prop>-principal_field of structure is_entity_a
+       to field-symbol(<fs_key_value>).
+      if sy-subrc = 0.
+
+        " Request Filters...
+        append value #( property       = <fs_nav_prop>-dependent_property
+                        select_options = value #( ( sign = 'I' option = 'EQ' low = <fs_key_value> ) ) )
+           to ls_request_new-filter_select_options[].
+
+        " Technical Request Filters...
+        append value #( property       = <fs_nav_prop>-dependent_field
+                        select_options = value #( ( sign = 'I' option = 'EQ' low = <fs_key_value> ) ) )
+             to ls_request_new-technical_request-filter_select_options[].
+      endif.
+    endloop.
+
+
+    " Create New Request Context...
+    create data lr_request like ls_request_new.
+    assign lr_request->* to <ls_request>.
+    <ls_request> = ls_request_new.
+
+    create object rv_request_filter
+      exporting
+        ir_request_details = lr_request
+        it_headers         = ls_request_new-technical_request-request_header
+        io_model           = io_model.
+
+
+
+  endmethod.
+
+
+  method convert_expand_to_filter_mul.
+
+    " The below is going to work only if the reference key is one field !!!
+
+    data: lo_request_filter       type ref to /iwbep/cl_mgw_request.
+    data: ls_request              type /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+    data: ls_request_new          type /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+    data: lr_request              type ref to /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+    data: lt_select_options       type /iwbep/t_cod_select_options.
+    data: lt_key_tab              type /iwbep/t_mgw_name_value_pair.
+    data: lv_max_hits             type i.
+
+    field-symbols:
+          <ls_request>            type /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+
+    define: _move.
+      ls_request_new-&1 = ls_request-&1.
+    end-of-definition.
+
+    data(lv_data_lines) = lines( it_data[] ).
+    check: lv_data_lines > 0.
+
+    " Get Request Data...
+    ls_request = io_request_exp->get_request_details( ).
+
+    data(lv_entity_set_a) = _get_es_by_et_( io_tech_request_context = io_request_exp iv_et_name = iv_entity_type_a ).
+    data(lv_entity_set_b) = _get_es_by_et_( io_tech_request_context = io_request_exp iv_et_name = iv_entity_type_b ).
+
+    " Check Navigation Properties...
+    call method _get_navigation_properties_
+      exporting
+        io_tech_request_context = io_request_exp
+        iv_principal_et         = iv_entity_type_a
+        iv_dependent_et         = iv_entity_type_b
+      importing
+        et_nav_props            = data(lt_nav_props).
+    if lines( lt_nav_props[] ) <> 1.
+      raise exception type /iwbep/cx_mgw_busi_exception
+        exporting
+          entity_type       = iv_entity_type_a
+          message_unlimited = 'Expand Operation Not Possible !'.
+    endif.
+    read table lt_nav_props into es_nav_prop index 1.
+
+
+    " Copy Technical Details...
+    _move: service_doc_name, namespace, version, cache_timestamp, base_url,
+           http_method, icf_root_node, system_alias_info, context_params,
+           format, type, operation, incoming_message.
+
+    " Set Source and Target Properties...
+    ls_request_new-source_entity     = iv_entity_type_b.
+    ls_request_new-target_entity     = iv_entity_type_b.
+    ls_request_new-source_entity_set = lv_entity_set_b.
+    ls_request_new-target_entity_set = lv_entity_set_b.
+
+    ls_request_new-technical_request-service_name       = ls_request_new-service_doc_name.
+    ls_request_new-technical_request-service_version    = ls_request_new-version.
+    ls_request_new-technical_request-source_entity_type = ls_request_new-source_entity.
+    ls_request_new-technical_request-target_entity_type = ls_request_new-target_entity.
+    ls_request_new-technical_request-source_entity_set  = ls_request_new-source_entity_set.
+    ls_request_new-technical_request-target_entity_set  = ls_request_new-target_entity_set.
+    ls_request_new-technical_request-request_header     = ls_request-technical_request-request_header.
+
+    " Special Handling for Max Hits...
+    lv_max_hits = ls_request-paging-top + ls_request-paging-skip.
+    if lv_max_hits > gc_max_hits.
+      ls_request_new-paging-top = lv_max_hits.
+    endif.
+
+    " Build Filter Table...
+    data(lv_key_field)  = es_nav_prop-principal_field.
+    loop at it_data assigning field-symbol(<fs_data>).
+      data(lv_tabix) = sy-tabix.
+
+      assign component lv_key_field of structure <fs_data> to field-symbol(<fs_key>).
+      if sy-subrc = 0.
+        append value #( sign = 'I' option = 'EQ' low   = <fs_key> ) to lt_select_options[].
+        append value #( name = lv_key_field      value = <fs_key> ) to lt_key_tab[].
+
+        if lines( lt_select_options[] ) >= 50 or lv_tabix = lv_data_lines. " Pack Size 50 or Last Row...
+          " Set Select Options...
+          sort lt_select_options[].
+          ls_request_new-filter_select_options[] = value #( ( property       = es_nav_prop-dependent_field
+                                                              select_options = lt_select_options[] ) ).
+          ls_request_new-technical_request-filter_select_options[] = ls_request_new-filter_select_options[].
+
+          " Set Key...
+          move-corresponding: lt_key_tab[] to ls_request_new-key_tab[].
+          move-corresponding: lt_key_tab[] to ls_request_new-technical_request-key_tab[].
+
+          " Create New Request Context...
+          create data lr_request like ls_request_new.
+          assign lr_request->* to <ls_request>.
+          <ls_request> = ls_request_new.
+
+          create object lo_request_filter
+            exporting
+              ir_request_details = lr_request
+              it_headers         = ls_request_new-technical_request-request_header
+              io_model           = io_model.
+          if lo_request_filter is bound.
+            append lo_request_filter to et_request_filter[].
+          endif.
+
+          clear: lt_select_options[],
+                 lt_key_tab[].
+        endif. " if lines( lt_select_options[] ) >= 50....
+      endif.
+    endloop.
+
+
+  endmethod.                                             "#EC CI_VALPAR
+
+
+  method convert_select_options.
+
+    statics: so_str_descr type ref to cl_abap_structdescr,
+             sv_name      type cdsview_source.
+
+    " Get Descriptor...
+    if iv_name is supplied.
+      if iv_name ne sv_name or so_str_descr is not bound.
+        clear: sv_name, so_str_descr.
+        so_str_descr ?= cl_abap_structdescr=>describe_by_name( iv_name ).
+        check: so_str_descr is bound.
+        sv_name = iv_name.
+      endif.
+    elseif iv_structure is supplied.
+      clear: sv_name, so_str_descr.
+      so_str_descr ?= cl_abap_structdescr=>describe_by_data( iv_structure ).
+      check: so_str_descr is bound.
+    endif.
+
+    " Convert Options...
+    try.
+        if so_str_descr->is_ddic_type( ).
+          convert_so_ddic_( exporting ir_struct_descr       = so_str_descr
+                            changing  ct_select_options     = ct_select_options
+                                      ct_filter_expressions = ct_filter_expressions ).
+        else.
+          convert_so_free_( exporting ir_struct_descr       = so_str_descr
+                            changing  ct_select_options     = ct_select_options
+                                      ct_filter_expressions = ct_filter_expressions ).
+        endif.
+      catch cx_root into data(lx_root).
+        raise exception type /iwbep/cx_mgw_busi_exception
+          exporting
+            previous = lx_root.
+    endtry.
+
+
+  endmethod.
+
+
+  method convert_so_ddic_.
+
+    data: lr_str_descr       type ref to cl_abap_structdescr.
+    data: lt_fields          type ddfields.
+    data: lt_comps           type cl_abap_structdescr=>component_table.
+    data: lt_range_comps     type cl_abap_structdescr=>component_table.
+    data: lr_range_str_descr type ref to cl_abap_structdescr.
+    data: lr_range_tab_descr type ref to cl_abap_tabledescr.
+    data: lr_range_line      type ref to data.
+    data: lr_range_tab_i     type ref to data.
+    data: lr_range_tab_e     type ref to data.
+    data: lr_field           type ref to data.
+
+    data: lv_func_name       type rs38l-name.
+    data: lv_include_found   type abap_bool.
+    data: lv_tabix           type i.
+    data: lv_max_len         type i.
+
+    field-symbols: <fs_ext_tab> type standard table,
+                   <fs_int_tab> type standard table,
+                   <fs_line>    type any,
+                   <fs_any>     type any.
+
+
+    " Get Descriptor...
+    lr_str_descr ?= ir_struct_descr.
+    check: lr_str_descr is bound.
+    check: lr_str_descr->is_ddic_type( ) is not initial.
+
+    " Get Fields...
+    lt_fields = lr_str_descr->get_ddic_field_list( ).
+
+    " Get Components (Can Be Includes)
+    lt_comps = lr_str_descr->get_components( ).
+    do.
+      lv_include_found = abap_false.
+
+*      loop at lt_comps into data(ls_comps) where as_include = abap_true.
+*        lv_tabix         = sy-tabix.
+*        lv_include_found = abap_true.
+*
+*        clear: lr_str_descr.
+*        lr_str_descr ?= ls_comps-type.
+*        if lr_str_descr is bound.
+*          insert lines of lr_str_descr->get_components( ) into lt_comps[] index lv_tabix.
+*        endif.
+*        delete table lt_comps from ls_comps.  <<<<<<<<< STOPPED WORKING....
+*      endloop.
+
+      loop at lt_comps assigning field-symbol(<fs_comp>) where as_include = abap_true.
+        lv_tabix         = sy-tabix.
+        lv_include_found = abap_true.
+
+        clear: lr_str_descr.
+        lr_str_descr ?= <fs_comp>-type.
+        if lr_str_descr is bound.
+          insert lines of lr_str_descr->get_components( ) into lt_comps[] index lv_tabix.
+        endif.
+        clear: <fs_comp>.
+      endloop.
+
+      if lv_include_found = abap_false.
+        delete lt_comps[] where table_line is initial.
+        exit.
+      endif.
+    enddo.
+
+    " Convert Select Options...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    loop at ct_select_options assigning field-symbol(<fs_select_option>).
+
+      read table lt_fields assigning field-symbol(<fs_field>)
+       with key fieldname = <fs_select_option>-property.
+      if sy-subrc = 0.
+
+        " Explicitly Check on Field Length...
+        " Should never happen, if SEGW is correct. JIRA: https://sapjira.wdf.sap.corp/browse/KNGMHM02-22811
+        loop at <fs_select_option>-select_options assigning field-symbol(<fs_so>).
+          lv_max_len = <fs_field>-outputlen.
+          if lv_max_len > 0.
+            if strlen( <fs_so>-low ) > lv_max_len or strlen( <fs_so>-high ) > lv_max_len.
+              zcx_odata_tools=>raise_length_exceeded_l( property = <fs_select_option>-property
+                                                        length   = lv_max_len ).
+            endif.
+          endif.
+        endloop.
+
+        check: <fs_field>-convexit is not initial.
+
+        lv_func_name = 'CONVERSION_EXIT_' && <fs_field>-convexit && '_RANGE_I'.
+
+        call function 'FUNCTION_EXISTS'
+          exporting
+            funcname           = lv_func_name
+          exceptions
+            function_not_exist = 1
+            others             = 2.
+        if sy-subrc <> 0.
+          continue.
+        endif.
+
+        " Create New Range Table...
+        clear: lt_range_comps[].
+        clear: lr_range_str_descr, lr_range_tab_descr.
+        clear: lr_range_tab_i, lr_range_tab_e, lr_range_line.
+
+        check: line_exists( lt_comps[ name = <fs_field>-fieldname ] ).
+
+        append value #( name = 'SIGN'   type = cast #( cl_abap_elemdescr=>describe_by_name( 'DDSIGN'   ) ) ) to lt_range_comps[] ##no_text.
+        append value #( name = 'OPTION' type = cast #( cl_abap_elemdescr=>describe_by_name( 'DDOPTION' ) ) ) to lt_range_comps[] ##no_text.
+        append value #( name = 'LOW'    type = cast #( lt_comps[ name = <fs_field>-fieldname ]-type      ) ) to lt_range_comps[] ##no_text.
+        append value #( name = 'HIGH'   type = cast #( lt_comps[ name = <fs_field>-fieldname ]-type      ) ) to lt_range_comps[] ##no_text.
+
+        lr_range_str_descr = cl_abap_structdescr=>get( p_components = lt_range_comps[] ).
+        lr_range_tab_descr = cl_abap_tabledescr=>get( lr_range_str_descr ).
+
+        create data lr_range_line   type handle lr_range_str_descr.
+        create data lr_range_tab_i  type handle lr_range_tab_descr.
+        create data lr_range_tab_e  type handle lr_range_tab_descr.
+
+        assign lr_range_line->*  to <fs_line>.
+        assign lr_range_tab_i->* to <fs_ext_tab>.
+        assign lr_range_tab_e->* to <fs_int_tab>.
+
+        assign component 'LOW' of structure <fs_line> to <fs_any>.
+
+        " Fill The Ranges...
+        loop at <fs_select_option>-select_options assigning field-symbol(<fs_sel_opt>).
+          move-corresponding: <fs_sel_opt> to <fs_line>.
+          append <fs_line> to <fs_ext_tab>.
+          append <fs_line> to <fs_int_tab>.
+        endloop.
+
+        " Convert The Ranges...
+        call function lv_func_name
+          exporting
+            input     = <fs_any>
+          importing
+            output    = <fs_any>
+          tables
+            range_int = <fs_int_tab>
+            range_ext = <fs_ext_tab>.
+
+        " Return Back...
+        if <fs_int_tab> is not initial.
+          clear: <fs_select_option>-select_options[].
+          loop at <fs_int_tab> assigning <fs_line>.
+            append initial line to <fs_select_option>-select_options[] assigning <fs_sel_opt>.
+            move-corresponding: <fs_line> to <fs_sel_opt>.
+          endloop.
+        endif.
+
+      endif.
+    endloop.
+
+    " Convert Filter Expressions...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    loop at ct_filter_expressions assigning field-symbol(<fs_filter_expression>).
+
+      read table lt_fields assigning <fs_field>
+       with key fieldname = <fs_filter_expression>-l_oprnd_int.
+      check: sy-subrc = 0.
+
+      " Explicitly Check on Field Length...
+      " Should never happen, if SEGW is correct. JIRA: https://sapjira.wdf.sap.corp/browse/KNGMHM02-22811
+      lv_max_len = <fs_field>-outputlen.
+      if lv_max_len > 0.
+        if strlen( <fs_filter_expression>-r_operand )   > lv_max_len or
+           strlen( <fs_filter_expression>-r_oprnd_int ) > lv_max_len.
+          zcx_odata_tools=>raise_length_exceeded_l( property = <fs_filter_expression>-l_oprnd_int
+                                                    length   = lv_max_len ).
+        endif.
+      endif.
+
+      check: <fs_field>-convexit is not initial.
+
+      lv_func_name = 'CONVERSION_EXIT_' && <fs_field>-convexit && '_INPUT'.
+
+      call function 'FUNCTION_EXISTS'
+        exporting
+          funcname           = lv_func_name
+        exceptions
+          function_not_exist = 1
+          others             = 2.
+      if sy-subrc <> 0.
+        continue.
+      endif.
+
+      " Create New Field...
+      data(lr_handle) = lt_comps[ name = <fs_field>-fieldname ]-type.
+      check: lr_handle is bound.
+
+      create data lr_field type handle lr_handle.
+      check: lr_field is bound.
+
+      assign lr_field->* to <fs_any>.
+      check sy-subrc = 0.
+
+      try.
+          <fs_any> = <fs_filter_expression>-r_oprnd_int.
+
+          " Convert the Value...
+          call function lv_func_name
+            exporting
+              input  = <fs_any>
+            importing
+              output = <fs_any>.
+
+          <fs_filter_expression>-r_oprnd_int = <fs_any>.
+          <fs_filter_expression>-r_operand   = <fs_any>.
+        catch cx_root.
+      endtry.
+    endloop.
+
+  endmethod.
+
+
+  method convert_so_free_.
+
+    data: lr_str_descr       type ref to cl_abap_structdescr.
+    data: lt_fields          type ddfields.
+    data: lt_comps           type cl_abap_structdescr=>component_table.
+    data: lr_fld_descr       type ref to cl_abap_elemdescr.
+    data: lv_mask            type string.
+    data: lt_range_comps     type cl_abap_structdescr=>component_table.
+    data: lr_range_str_descr type ref to cl_abap_structdescr.
+    data: lr_range_tab_descr type ref to cl_abap_tabledescr.
+    data: lr_range_line      type ref to data.
+    data: lr_range_tab_i     type ref to data.
+    data: lr_range_tab_e     type ref to data.
+    data: lr_field           type ref to data.
+
+    data: lv_func_name       type rs38l-name.
+    data: lv_include_found   type abap_bool.
+    data: lv_tabix           type i.
+    data: lv_max_len         type i.
+
+    field-symbols: <fs_ext_tab> type standard table,
+                   <fs_int_tab> type standard table,
+                   <fs_line>    type any,
+                   <fs_any>     type any.
+
+
+    " Get Descriptor...
+    lr_str_descr ?= ir_struct_descr.
+    check: lr_str_descr is bound.
+
+    " Get Components (Can Be Includes)
+    lt_comps = lr_str_descr->get_components( ).
+    do.
+      lv_include_found = abap_false.
+
+*      loop at lt_comps into data(ls_comps) where as_include = abap_true.
+*        lv_tabix         = sy-tabix.
+*        lv_include_found = abap_true.
+*
+*        clear: lr_str_descr.
+*        lr_str_descr ?= ls_comps-type.
+*        if lr_str_descr is bound.
+*          insert lines of lr_str_descr->get_components( ) into lt_comps[] index lv_tabix.
+*        endif.
+*        delete table lt_comps from ls_comps.
+*      endloop.
+
+      loop at lt_comps assigning field-symbol(<fs_comp>) where as_include = abap_true.
+        lv_tabix         = sy-tabix.
+        lv_include_found = abap_true.
+
+        clear: lr_str_descr.
+        lr_str_descr ?= <fs_comp>-type.
+        if lr_str_descr is bound.
+          insert lines of lr_str_descr->get_components( ) into lt_comps[] index lv_tabix.
+        endif.
+        clear: <fs_comp>.
+      endloop.
+
+      if lv_include_found = abap_false.
+        delete lt_comps[] where table_line is initial.
+        exit.
+      endif.
+    enddo.
+
+    " Convert Select Options...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    loop at ct_select_options assigning field-symbol(<fs_select_option>).
+
+      read table lt_comps assigning <fs_comp>
+       with key name = <fs_select_option>-property.
+      if sy-subrc = 0.
+
+        " Explicitly Check on Field Length...
+        " Should never happen, if SEGW is correct. JIRA: https://sapjira.wdf.sap.corp/browse/KNGMHM02-22811
+        loop at <fs_select_option>-select_options assigning field-symbol(<fs_so>).
+
+          data(lr_elem) = cast cl_abap_elemdescr( <fs_comp>-type ).
+          lv_max_len = lr_elem->output_length.
+          if lv_max_len > 0.
+            if strlen( <fs_so>-low ) > lv_max_len or strlen( <fs_so>-high ) > lv_max_len.
+              zcx_odata_tools=>raise_length_exceeded_l( property = <fs_select_option>-property
+                                                        length   = lv_max_len ).
+            endif.
+          endif.
+        endloop.
+
+        check: <fs_comp>-type is bound.
+        lr_fld_descr ?= <fs_comp>-type.
+        check: lr_fld_descr is bound.
+
+        lv_mask = lr_fld_descr->edit_mask.
+        check lv_mask is not initial.
+        replace all occurrences of '=' in lv_mask with space.
+        condense lv_mask.
+        check lv_mask is not initial.
+
+        lv_func_name = 'CONVERSION_EXIT_' && lv_mask && '_RANGE_I'.
+        condense lv_func_name.
+        translate lv_func_name to upper case.
+
+        call function 'FUNCTION_EXISTS'
+          exporting
+            funcname           = lv_func_name
+          exceptions
+            function_not_exist = 1
+            others             = 2.
+        if sy-subrc <> 0.
+          continue.
+        endif.
+
+        " Create New Range Table...
+        clear: lt_range_comps[].
+        clear: lr_range_str_descr, lr_range_tab_descr.
+        clear: lr_range_tab_i, lr_range_tab_e, lr_range_line.
+
+        append value #( name = 'SIGN'   type = cast #( cl_abap_elemdescr=>describe_by_name( 'DDSIGN'   ) ) ) to lt_range_comps[] ##no_text.
+        append value #( name = 'OPTION' type = cast #( cl_abap_elemdescr=>describe_by_name( 'DDOPTION' ) ) ) to lt_range_comps[] ##no_text.
+        append value #( name = 'LOW'    type = cast #( lr_fld_descr ) ) to lt_range_comps[] ##no_text.
+        append value #( name = 'HIGH'   type = cast #( lr_fld_descr ) ) to lt_range_comps[] ##no_text.
+
+        lr_range_str_descr = cl_abap_structdescr=>get( p_components = lt_range_comps[] ).
+        lr_range_tab_descr = cl_abap_tabledescr=>get( lr_range_str_descr ).
+
+        create data lr_range_line   type handle lr_range_str_descr.
+        create data lr_range_tab_i  type handle lr_range_tab_descr.
+        create data lr_range_tab_e  type handle lr_range_tab_descr.
+
+        assign lr_range_line->*  to <fs_line>.
+        assign lr_range_tab_i->* to <fs_ext_tab>.
+        assign lr_range_tab_e->* to <fs_int_tab>.
+
+        assign component 'LOW' of structure <fs_line> to <fs_any>.
+
+        " Fill The Ranges...
+        loop at <fs_select_option>-select_options assigning field-symbol(<fs_sel_opt>).
+          move-corresponding: <fs_sel_opt> to <fs_line>.
+          append <fs_line> to <fs_ext_tab>.
+          append <fs_line> to <fs_int_tab>.
+        endloop.
+
+        " Convert The Ranges...
+        try.
+            call function lv_func_name
+              exporting
+                input     = <fs_any>
+              importing
+                output    = <fs_any>
+              tables
+                range_int = <fs_int_tab>
+                range_ext = <fs_ext_tab>
+              exceptions
+                others    = 1.
+          catch cx_root.
+            sy-subrc = 1.
+        endtry.
+
+        " Return Back...
+        if sy-subrc = 0.
+          if <fs_int_tab> is not initial.
+            clear: <fs_select_option>-select_options[].
+            loop at <fs_int_tab> assigning <fs_line>.
+              append initial line to <fs_select_option>-select_options[] assigning <fs_sel_opt>.
+              move-corresponding: <fs_line> to <fs_sel_opt>.
+            endloop.
+          endif.
+        endif.
+      endif.
+    endloop.
+
+
+    " Convert Filter Expressions...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    loop at ct_filter_expressions assigning field-symbol(<fs_filter_expression>).
+
+      read table lt_comps assigning <fs_comp>
+       with key name = <fs_filter_expression>-l_oprnd_int.
+      check: sy-subrc = 0.
+
+      " Explicitly Check on Field Length...
+      " Should never happen, if SEGW is correct. JIRA: https://sapjira.wdf.sap.corp/browse/KNGMHM02-22811
+      lr_elem = cast cl_abap_elemdescr( <fs_comp>-type ).
+      lv_max_len = lr_elem->output_length.
+      if lv_max_len > 0.
+        if strlen( <fs_filter_expression>-r_operand )   > lv_max_len or
+           strlen( <fs_filter_expression>-r_oprnd_int ) > lv_max_len.
+          zcx_odata_tools=>raise_length_exceeded_l( property = <fs_filter_expression>-l_oprnd_int
+                                                    length   = lv_max_len ).
+        endif.
+      endif.
+
+      check: <fs_comp>-type is bound.
+      lr_fld_descr ?= <fs_comp>-type.
+      check: lr_fld_descr is bound.
+
+      lv_mask = lr_fld_descr->edit_mask.
+      check lv_mask is not initial.
+      replace all occurrences of '=' in lv_mask with space.
+      condense lv_mask.
+      check lv_mask is not initial.
+
+      lv_func_name = 'CONVERSION_EXIT_' && lv_mask && '_INPUT'.
+      condense lv_func_name.
+      translate lv_func_name to upper case.
+
+      call function 'FUNCTION_EXISTS'
+        exporting
+          funcname           = lv_func_name
+        exceptions
+          function_not_exist = 1
+          others             = 2.
+      if sy-subrc <> 0.
+        continue.
+      endif.
+
+      " Create New Field...
+      create data lr_field type handle lr_fld_descr.
+      check: lr_field is bound.
+
+      assign lr_field->* to <fs_any>.
+      check sy-subrc = 0.
+
+      try.
+          <fs_any> = <fs_filter_expression>-r_oprnd_int.
+
+          " Convert the Value...
+          call function lv_func_name
+            exporting
+              input  = <fs_any>
+            importing
+              output = <fs_any>.
+
+          <fs_filter_expression>-r_oprnd_int = <fs_any>.
+          <fs_filter_expression>-r_operand   = <fs_any>.
+        catch cx_root.
+      endtry.
+    endloop.
+
+  endmethod.
+
+
+  method copy_data_to_ref.
+
+    field-symbols: <ls_data> type any.
+
+    create data cr_data like is_data.
+    assign cr_data->* to <ls_data>.
+    <ls_data> = is_data.
+
+  endmethod.
+
+
+  method db_count_.
+
+    types: begin of lty_cnt,
+             cnt type int4,
+           end of lty_cnt.
+
+    data: lv_sql     type string.
+    data: lv_tabname type tabname.
+    data: lt_keys    type string_table.
+    data: lt_sql     type string_table.
+    data: lt_from    type string_table.
+    data: lr_adapter type ref to cl_sql_statement.
+    data: lr_result  type ref to cl_sql_result_set.
+    data: lr_count   type ref to data.
+
+    lt_from[] = it_from[].
+
+    " Check From...
+    read table lt_from[] index 1 assigning field-symbol(<fs_from>).
+    check: sy-subrc = 0.
+    lv_tabname = <fs_from>.
+
+    " Get CDS/View Keys and Format Them...
+    lt_keys[] = check_select_( it_select = get_key_fields_( lv_tabname )
+                               iv_table  = conv #( lv_tabname ) ).
+    if lines( lt_keys[] ) > 1.
+      loop at lt_keys[] assigning field-symbol(<fs_key>).
+        if sy-tabix <> lines( lt_keys[] ).
+          concatenate <fs_key> ',' into <fs_key> separated by space.
+        endif.
+      endloop.
+    endif.
+
+    " Check if CDS View or Normal One...
+    call method cl_ci_provide_cds_info=>check_is_cds_view
+      exporting
+        p_tabname  = lv_tabname
+      importing
+        p_cds_info = data(ls_cds_info).
+
+    " Check Table -> No switch...
+    <fs_from> = check_table_( conv #( lv_tabname ) ).
+
+    " Process as CDS View (ABAP + Authorizations)...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if ls_cds_info-is_cds_object = abap_true.
+
+      case lines( lt_keys[] ).
+        when 0.
+          " COUNT(*)
+          select count( * ) into @rv_count
+            from  (lt_from)
+            where (it_where).
+
+        when 1.
+          " COUNT( DISTINCT KEY )
+          data: lv_select type string.
+          data: lt_cnt     type table of lty_cnt.
+
+          lv_select = `COUNT( DISTINCT ` && lt_keys[ 1 ] && ` ) AS CNT`.
+
+          select  (lv_select) into corresponding fields of table @lt_cnt[]
+            from  (lt_from)
+            where (it_where).
+          if sy-subrc = 0.
+            rv_count = lt_cnt[ 1 ]-cnt.
+          endif.
+
+        when others.
+          " Here need to select data due to Kernel limitations...
+          data: lr_data              type ref to data.
+          field-symbols: <fs_data>   type standard table.
+
+          create data lr_data type standard table of (ls_cds_info-cds_db_view).
+          assign lr_data->* to <fs_data>.
+          if <fs_data> is assigned.
+
+            select distinct (lt_keys) into corresponding fields of table @<fs_data>
+              from (lt_from)
+              where (it_where).
+            if sy-subrc = 0.
+              rv_count = lines( <fs_data> ).
+            endif.
+          endif.
+      endcase.
+
+
+
+
+    elseif ls_cds_info-is_cds_object = abap_false.
+      " Process as DB View (SQL)...
+      """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+      " Build SQL Statement...
+      " Select ..................................................
+      if lt_keys[] is not initial.
+        append 'select count( distinct ' to lt_sql[].
+        append lines of lt_keys          to lt_sql[].
+        append ' ) '                     to lt_sql[].
+      else.
+        append 'select count( * ) '      to lt_sql[].
+      endif.
+      " From ....................................................
+      append 'from '                   to lt_sql[].
+      append lines of lt_from          to lt_sql[].
+      " Where ...................................................
+      if it_where[] is not initial.
+        append 'where'                 to lt_sql[].
+        append lines of it_where       to lt_sql[].
+      endif.
+
+      concatenate lines of lt_sql into lv_sql separated by space.
+      condense lv_sql.
+
+      " Execute SQl Query...
+      get reference of rv_count into lr_count.
+
+      try.
+          create object lr_adapter.
+          lr_result = lr_adapter->execute_query( lv_sql ).
+          lr_result->set_param_struct( lr_count ).
+
+          while lr_result->next( ) > 0.
+          endwhile.
+
+        catch cx_root into data(lr_exception).
+          raise exception type /iwbep/cx_mgw_busi_exception
+            exporting
+              previous = lr_exception.
+      endtry.
+    endif.
+
+  endmethod.
+
+
+  method db_select_.
+
+    data: lt_select     type string_table.
+    data: lt_from       type string_table.
+    data: lt_where      type string_table.
+    data: lt_order_by   type string_table.
+    data: lv_max_hits   type int4.
+    data: lv_select     type string.
+
+    lt_select[]   = it_select[].
+    lt_from[]     = it_from[].
+    lt_where[]    = it_where[].
+    lt_order_by[] = it_order_by[].
+
+    if iv_max_hits = 0.
+      lv_max_hits = gc_max_hits.
+    else.
+      lv_max_hits = iv_max_hits.
+    endif.
+
+
+    " Convert Select to a New Syntax...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if lt_select is initial.
+      append '*' to lt_select[].
+    else.
+      if lines( lt_select[] ) > 1.
+        loop at lt_select[] assigning field-symbol(<fs_select>).
+          if sy-tabix <> lines( lt_select[] ).
+            concatenate <fs_select> ',' into <fs_select> separated by space.
+          endif.
+        endloop.
+      endif.
+    endif.
+
+
+    " Perform Data Selection...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_select_by_keys = abap_false.
+      " Select via WHERE conditions...
+      if iv_data = abap_true.
+        if iv_distinct = abap_false.
+
+          select     (lt_select)
+            from     (lt_from)
+            where    (lt_where)
+            order by (lt_order_by)
+            into corresponding fields of table @ct_data[]
+            up to @lv_max_hits rows.
+        else.
+
+          select
+            distinct (lt_select)
+            from     (lt_from)
+            where    (lt_where)
+            order by (lt_order_by)
+            into corresponding fields of table @ct_data[]
+            up to @lv_max_hits rows.
+        endif.
+      endif.
+      " Select By Keys...
+    elseif iv_select_by_keys = abap_true and ct_data[] is not initial.
+
+      select
+         distinct (lt_select)
+         from     (lt_from)
+         for all entries in @ct_data[]
+         where    (lt_where)
+         %_hints hdb '&prefer_join_with_fda 0&'
+         into corresponding fields of table @ct_data[].   "#EC CI_HINTS
+    endif.
+
+    " Perform Count over Distinct Keys, ignoring MAX_HITS...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_count = abap_true and iv_select_by_keys = abap_false.
+      " Avoid second select if all hits are selected, i.e. lines() LESS (not LESS OR EQUAL) than Max Hits...
+      if iv_data = abap_true and lines( ct_data[] ) < lv_max_hits.
+        ev_count = lines( ct_data[] ).
+      else.
+        ev_count = db_count_( it_from  = lt_from
+                              it_where = lt_where ).
+      endif.
+    endif.
+
+
+  endmethod.
+
+
+  method determine_cds_.
+
+    " Strategy 1: Project/Entity -> Structure -> CDS View...
+    try.
+        data: lv_ddic_str type string.
+
+        data(ls_details)     = io_tech_request_context->get_request_details( ).
+        data(lv_entity_type) = ls_details-target_entity.
+
+        lv_ddic_str = _get_ddic_structure_for_et_( io_tech_request_context = io_tech_request_context
+                                                   iv_entity_type_name     = lv_entity_type ).
+
+        call method cl_ci_provide_cds_info=>check_is_cds_view
+          exporting
+            p_tabname  = conv #( lv_ddic_str )
+          importing
+            p_cds_info = data(ls_cds_info).
+
+        if ls_cds_info-cds_entity is not initial.
+          rv_cds_name = ls_cds_info-cds_entity.
+        elseif ls_cds_info-cds_db_view is not initial.
+          rv_cds_name = ls_cds_info-cds_db_view.
+        endif.
+      catch cx_root.
+    endtry.
+
+  endmethod.
+
+
+  method expand_generic_entity_set.
+
+    data: lr_entity_set    type ref to data.
+
+    field-symbols: <fs_entity_set_tab> type standard table.
+    field-symbols: <fs_expand_tab>     type standard table.
+    field-symbols: <fs_expand_str>     type any.
+
+    check: lines( ct_data[] ) > 0.
+
+    data(lv_entity_type_a) = io_tech_request_context->/iwbep/if_mgw_req_entity~get_entity_type_name( ).
+    data(lv_entity_type_b) = io_expand_node->/iwbep/if_mgw_odata_expand~get_tech_entity_type( ).
+    data(lv_nav_prop_name) = io_expand_node->/iwbep/if_mgw_tech_expand_node~get_nav_prop_name( ).
+    data(lv_multiplicity)  = io_expand_node->get_multiplicity( ).
+    if lv_entity_type_a is initial or
+       lv_entity_type_b is initial or
+       lv_nav_prop_name is initial.
+      raise exception type /iwbep/cx_mgw_busi_exception
+        exporting
+          entity_type       = conv #( lv_entity_type_a )
+          message_unlimited = 'Expand Operation Not Possible !'.
+    endif.
+
+
+    call method zscl_odata_tools=>convert_expand_to_filter_mul
+      exporting
+        io_request_exp    = io_tech_request_context
+        iv_entity_type_a  = conv #( lv_entity_type_a )
+        iv_entity_type_b  = conv #( lv_entity_type_b )
+        it_data           = ct_data
+        io_model          = io_expand_node->get_model( )
+      importing
+        es_nav_prop       = data(ls_nav_prop)
+        et_request_filter = data(lt_new_requests).
+
+    loop at lt_new_requests into data(lr_new_request).
+      check lr_new_request is bound.
+      data(ls_details) = lr_new_request->get_request_details( ).
+
+      " Get EntitySet Data...
+      call method io_data_provider->get_entityset
+        exporting
+          iv_entity_name           = ls_details-target_entity
+          iv_entity_set_name       = ls_details-target_entity_set
+          iv_source_name           = ls_details-source_entity
+          it_filter_select_options = ls_details-filter_select_options
+          is_paging                = value #( top  = ls_details-paging-top
+                                              skip = ls_details-paging-skip )
+          it_key_tab               = ls_details-key_tab
+          it_navigation_path       = ls_details-navigation_path
+          it_order                 = ls_details-order
+          iv_filter_string         = ls_details-technical_request-filter_string
+          iv_search_string         = ''
+          io_tech_request_context  = lr_new_request
+        importing
+          er_entityset             = lr_entity_set.
+      if lr_entity_set is not initial.
+        assign lr_entity_set->* to <fs_entity_set_tab>.
+        check:  <fs_entity_set_tab> is not initial.
+
+        " Fill Result Structure...
+        loop at ct_data assigning field-symbol(<fs_data>).
+          unassign <fs_expand_tab>.
+          unassign <fs_expand_str>.
+
+          if lv_multiplicity co '01'. " Table or Structure ?
+            assign component lv_nav_prop_name of structure <fs_data> to <fs_expand_str>.
+          else.
+            assign component lv_nav_prop_name of structure <fs_data> to <fs_expand_tab>.
+          endif.
+          if ( sy-subrc = 0 and <fs_expand_tab> is assigned and <fs_expand_tab> is initial ) or
+             ( sy-subrc = 0 and <fs_expand_str> is assigned and <fs_expand_str> is initial ).
+
+            " Get Principal Entity Key...
+            assign component ls_nav_prop-principal_field of structure <fs_data>
+             to field-symbol(<fs_key>).
+            if sy-subrc = 0.
+              try.
+                  cl_abap_dyn_prg=>check_variable_name( ls_nav_prop-dependent_field ).
+                catch cx_abap_invalid_name.
+                  return.
+              endtry.
+              data(lv_where) = |{ ls_nav_prop-dependent_field } = <fs_key>|.
+              loop at <fs_entity_set_tab> assigning field-symbol(<fs_entity>) where (lv_where).
+                if lv_multiplicity co '01'.
+                  move-corresponding: <fs_entity> to <fs_expand_str>.
+                else.
+                  append initial line to <fs_expand_tab> assigning field-symbol(<fs_expand_line>).
+                  if sy-subrc = 0.
+                    move-corresponding: <fs_entity> to <fs_expand_line>.
+                  endif.
+                endif.
+              endloop.
+            endif.
+          endif.
+        endloop.
+      endif.
+    endloop.
+
+    " Set Flags...
+    io_expand_node->set_is_expanded( abap_true ).
+
+    " To Stop Expanding...
+    append lv_nav_prop_name to ct_expanded_properties[].
+
+
+  endmethod.
+
+
+  method fetch_cds_data_by_keys.
+
+    data: lv_cds_view        type cdsview_source.
+    data: lt_select          type string_table.
+    data: lt_key_fields      type string_table.
+    data: lt_tech_order      type /iwbep/t_mgw_tech_order.
+    data: lt_order           type /iwbep/t_mgw_sorting_order.
+
+    data: lv_max_hits        type i.
+
+
+    field-symbols: <fs_line> type any,
+                   <fs_key>  type any.
+
+    check: ct_entity_set[] is not initial.
+
+
+    " Get CDS View Name...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_cds_view is not initial.
+      lv_cds_view = to_upper( iv_cds_view ).
+    else.
+      " Determine...
+      lv_cds_view = determine_cds_( cast #( io_tech_request_context ) ).
+    endif.
+
+    " Max Hits...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lv_max_hits = lines( ct_entity_set[] ).
+
+
+    " Get Select (always add key fields)...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_select = build_select_table( iv_cds_view             = lv_cds_view
+                                    io_tech_request_context = cast #( io_tech_request_context ) ).
+
+
+    " Perform Selection...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    get_cds_data( exporting  iv_cds_view              = lv_cds_view
+                             it_select                = lt_select
+                             iv_max_hits              = conv #( lv_max_hits )
+                             iv_distinct              = abap_true
+                             iv_count                 = abap_false
+                             iv_data                  = abap_true
+                             iv_select_by_keys        = abap_true
+                   changing  ct_data                  = ct_entity_set ).
+
+    " Remove Duplicates...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_remove_duplicates = abap_true.
+      remove_duplicates_by_key_( exporting iv_cds_view = iv_cds_view
+                                 changing ct_data      = ct_entity_set ).
+    endif.
+
+    " Resort result, as sorting could have been broken by HANA...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_tech_order = io_tech_request_context->get_orderby( ).
+    if lt_tech_order[] is not initial.
+      move-corresponding: lt_tech_order[] to lt_order[].
+      call method /iwbep/cl_mgw_data_util=>orderby
+        exporting
+          it_order = lt_order
+        changing
+          ct_data  = ct_entity_set.
+    endif.
+
+  endmethod.
+
+
+  method get_cds_data.
+
+    data: lv_cds_view        type cdsview_source.
+    data: lt_select          type string_table.
+    data: lt_where           type string_table.
+    data: lt_order_by        type string_table.
+    data: lt_select_options  type /iwbep/t_mgw_select_option.
+    data: lr_data            type ref to data.
+    data: lv_top             type i.
+    data: lv_skip            type i.
+    data: lv_max_hits        type i.
+
+    field-symbols: <fs_data>   type standard table.
+
+
+    " Get CDS View Name...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_cds_view is not initial.
+      lv_cds_view = to_upper( iv_cds_view ).
+    else.
+      raise exception type /iwbep/cx_mgw_busi_exception
+        exporting
+          message_unlimited = conv #( text-e01 ).
+    endif.
+
+    " Create Internal Table as CDS DDIC View...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    call method cl_ci_provide_cds_info=>check_is_cds_view
+      exporting
+        p_tabname  = lv_cds_view
+      importing
+        p_cds_info = data(ls_cds_info).
+    if ls_cds_info-is_cds_object = abap_true.
+      data(lv_db_view) = ls_cds_info-cds_db_view.
+    else.
+      lv_db_view = lv_cds_view.
+    endif.
+
+    create data lr_data type standard table of (lv_db_view).
+    assign lr_data->* to <fs_data>.
+    if iv_select_by_keys = abap_true.
+      move-corresponding: ct_data[] to <fs_data>[].
+      clear: ct_data[].
+    endif.
+
+
+    " Get Select Options...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_select_options[] = it_filter_select_options[].
+
+
+    " Do INPUT conversions for the variables...
+    convert_select_options( exporting iv_name           = lv_cds_view
+                            changing  ct_select_options = lt_select_options ).
+
+    " Build Where Clause...
+    lt_where = build_where_table( iv_cds_view       = lv_cds_view
+                                  it_select_option  = lt_select_options
+                                  iv_filter_string  = iv_filter_string
+                                  iv_select_by_keys = iv_select_by_keys ).
+
+
+    " Get Max Hits...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lv_max_hits = iv_max_hits.
+
+
+    " Get Order By...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_order_by[] = it_order_by[].
+
+
+    " Get Select (always add key- and sort- fields)...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_select_keys is initial.
+      lt_select[] = it_select[].
+    else.
+      lt_select[] = get_key_fields_( lv_cds_view ).
+    endif.
+    if lt_select[]   is not initial and
+       lt_order_by[] is not initial.
+      loop at lt_order_by[] into data(lv_order_by).
+        replace all occurrences of 'DESCENDING' in lv_order_by with space.
+        replace all occurrences of 'ASCENDING'  in lv_order_by with space.
+        replace all occurrences of ','          in lv_order_by with space.
+        condense lv_order_by no-gaps.
+        collect lv_order_by into lt_select[].
+      endloop.
+    endif.
+
+
+
+    " Check CDS View...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lv_cds_view = check_table_( conv #( lv_cds_view ) ).
+
+
+    " Check Select...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_select[] = check_select_( it_select = lt_select[]
+                                 iv_table  = conv #( lv_cds_view ) ).
+
+
+    " Execute DB Selection...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    try.
+        db_select_( exporting it_select         = lt_select[]
+                              it_from           = value #( ( conv #( lv_cds_view ) ) )
+                              it_where          = lt_where[]
+                              it_order_by       = lt_order_by[]
+                              iv_max_hits       = conv #( lv_max_hits )
+                              iv_distinct       = iv_distinct
+                              iv_count          = iv_count
+                              iv_data           = iv_data
+                              iv_select_by_keys = iv_select_by_keys
+                    importing ev_count          = ev_count
+                    changing  ct_data           = <fs_data> ).
+
+      catch cx_sy_dynamic_osql_error into data(lr_db_err).
+        raise exception type /iwbep/cx_mgw_busi_exception
+          exporting
+            previous = lr_db_err.
+    endtry.
+
+    if <fs_data>[] is not initial.
+      move-corresponding: <fs_data>[] to ct_data[].
+    endif.
+
+
+  endmethod.
+
+
+  method get_cds_entity.
+
+    data: lv_cds_view        type cdsview_source.
+    data: lt_select          type string_table.
+    data: lt_where           type string_table.
+    data: lt_select_options  type /iwbep/t_mgw_select_option.
+    data: lr_data            type ref to data.
+
+    field-symbols: <fs_data> type standard table.
+    create data lr_data like table of cs_entity.
+    assign lr_data->* to <fs_data>.
+
+
+    " Get CDS View Name...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_cds_view is not initial.
+      lv_cds_view = iv_cds_view.
+    else.
+      " Determine...
+      lv_cds_view = determine_cds_( cast #( io_tech_request_context ) ).
+    endif.
+
+
+    " Get Converted Keys...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    io_tech_request_context->get_converted_keys( importing es_key_values = cs_entity ).
+
+
+    " Build Where Table...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    loop at get_key_fields_( lv_cds_view ) assigning field-symbol(<key_field_name>).
+      assign component <key_field_name> of structure cs_entity to field-symbol(<key_field_value>).
+      if sy-subrc = 0 and <key_field_value> is not initial.
+        append value #( property = <key_field_name>
+                        select_options = value #( ( sign = 'I' option = 'EQ' low = <key_field_value> ) )
+                      ) to lt_select_options[].
+      endif.
+    endloop.
+
+
+    " Get Select Options from Navigation...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if lt_select_options[] is initial.
+      lt_select_options = get_so_from_navigation( cast #( io_tech_request_context ) ).
+    endif.
+
+
+    try.
+        " Do INPUT conversions for the variables...
+        convert_select_options( exporting iv_name           = lv_cds_view
+                                changing  ct_select_options = lt_select_options ).
+
+        " Build WHere Clause...
+        lt_where = build_where_table( iv_cds_view      = lv_cds_view
+                                      it_select_option = lt_select_options ).
+
+      catch cx_shdb_exception into data(lr_catch).
+        raise exception type /iwbep/cx_mgw_busi_exception
+          exporting
+            previous = lr_catch.
+    endtry.
+
+    " Get Select...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_select = build_select_table( iv_cds_view             = lv_cds_view
+                                    io_tech_request_context = cast #( io_tech_request_context ) ).
+
+
+    " Check CDS View...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lv_cds_view = check_table_( conv #( lv_cds_view ) ).
+
+
+
+    " Execute DB Selection...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    try.
+        db_select_( exporting it_select   = lt_select
+                              it_from     = value #( ( conv #( lv_cds_view ) ) )
+                              it_where    = lt_where
+                              iv_max_hits = 1
+                    changing  ct_data     = <fs_data> ).
+
+      catch cx_sy_dynamic_osql_error into data(lr_db_err).
+        raise exception type /iwbep/cx_mgw_busi_exception
+          exporting
+            previous = lr_db_err.
+    endtry.
+
+    if <fs_data>[] is not initial.
+      read table <fs_data> into cs_entity index 1.
+    else.
+      clear cs_entity .
+    endif.
+
+
+  endmethod.
+
+
+  method get_cds_entity_set.
+
+    data: lv_cds_view        type cdsview_source.
+    data: lt_select          type string_table.
+    data: lt_order_by        type string_table.
+    data: lv_filter_string   type string.
+    data: lt_select_options  type /iwbep/t_mgw_select_option.
+    data: lv_top             type i.
+    data: lv_skip            type i.
+    data: lv_max_hits        type i.
+    data: lv_count_flag      type abap_bool.
+    data: lv_data_flag       type abap_bool.
+    data: lv_count           type i.
+
+
+    " Get CDS View Name...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_cds_view is not initial.
+      lv_cds_view = to_upper( iv_cds_view ).
+    else.
+      " Determine...
+      lv_cds_view = determine_cds_( cast #( io_tech_request_context ) ).
+    endif.
+
+
+    " Get Select Options...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if it_select_options[] is supplied and it_select_options[] is not initial.
+      lt_select_options[] = it_select_options[].
+    else.
+      lt_select_options = io_tech_request_context->get_filter( )->get_filter_select_options( ).
+    endif.
+
+    " Get Select Options from Navigation...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if lt_select_options[] is initial.
+      lt_select_options = get_so_from_navigation( cast #( io_tech_request_context ) ).
+    endif.
+
+    " Can be a Non-Standard Filter String...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if io_tech_request_context->get_filter( )->get_filter_select_options( ) is initial and
+       io_tech_request_context->get_filter( )->get_filter_string( ) is not initial.
+      lv_filter_string = get_converted_filter_string( io_tech_request_context = io_tech_request_context
+                                                      iv_cds_name             = lv_cds_view ).
+    endif.
+
+    " Get Max Hits...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lv_top  = io_tech_request_context->get_top( ).
+    lv_skip = io_tech_request_context->get_skip( ).
+    lv_max_hits = lv_top + lv_skip.
+
+    " Get Count Flag and Data Flag...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if io_tech_request_context->has_count( ) is not initial.
+      lv_count_flag = abap_true.
+      lv_data_flag  = abap_false.
+    elseif io_tech_request_context->has_inlinecount( ). "data + counters
+      lv_count_flag = abap_true.
+      lv_data_flag  = abap_true.
+    else. "standard query, no counters
+      lv_count_flag = abap_false.
+      lv_data_flag  = abap_true.
+    endif.
+
+
+    " Get Select (always add key fields)...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_select = build_select_table( iv_cds_view             = lv_cds_view
+                                    io_tech_request_context = cast #( io_tech_request_context ) ).
+
+
+    " Get Order By...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_order_by = build_order_by_table( iv_cds_view             = lv_cds_view
+                                        io_tech_request_context = cast #( io_tech_request_context ) ).
+
+
+    " Perform Selection...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    get_cds_data( exporting  iv_cds_view              = lv_cds_view
+                             it_filter_select_options = lt_select_options
+                             iv_filter_string         = lv_filter_string
+                             it_select                = lt_select
+                             it_order_by              = lt_order_by
+                             iv_max_hits              = conv #( lv_max_hits )
+                             iv_distinct              = iv_distinct
+                             iv_count                 = lv_count_flag
+                             iv_data                  = lv_data_flag
+                   importing ev_count                 = lv_count
+                   changing  ct_data                  = ct_entity_set ).
+
+    " Counters...
+    if lv_count_flag = abap_true.
+      cs_response_context-inlinecount = lv_count.
+      cs_response_context-count       = lv_count.
+    endif.
+
+
+    if ct_entity_set is not initial.
+      " Check Skip...
+      if lv_skip > 0.
+        delete ct_entity_set[] from 1 to lv_skip.
+      endif.
+    endif.
+
+
+  endmethod.
+
+
+  method get_cds_keys.
+
+    data: lv_cds_view        type cdsview_source.
+    data: lt_select_options  type /iwbep/t_mgw_select_option.
+    data: lt_select          type string_table.
+    data: lt_order_by        type string_table.
+    data: lv_filter_string   type string.
+    data: lv_top             type i.
+    data: lv_skip            type i.
+    data: lv_max_hits        type i.
+    data: lv_count_flag      type abap_bool.
+    data: lv_data_flag       type abap_bool.
+    data: lv_count           type i.
+
+
+    " Get CDS View Name...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if iv_cds_view is not initial.
+      lv_cds_view = to_upper( iv_cds_view ).
+    else.
+      " Determine...
+      lv_cds_view = determine_cds_( cast #( io_tech_request_context ) ).
+    endif.
+
+
+    " Get Select Options...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if it_select_options[] is not initial.
+      lt_select_options[] = it_select_options[].
+    else.
+      lt_select_options = io_tech_request_context->get_filter( )->get_filter_select_options( ).
+    endif.
+
+    " Get Select Options from Navigation...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if lt_select_options[] is initial.
+      lt_select_options = get_so_from_navigation( cast #( io_tech_request_context ) ).
+    endif.
+
+    " Can be a Non-Standard Filter String...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if io_tech_request_context->get_filter( )->get_filter_select_options( ) is initial and
+       io_tech_request_context->get_filter( )->get_filter_string( ) is not initial.
+      lv_filter_string = get_converted_filter_string( io_tech_request_context = io_tech_request_context
+                                                      iv_cds_name             = lv_cds_view ).
+    endif.
+
+    " Get Max Hits...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lv_top  = io_tech_request_context->get_top( ).
+    lv_skip = io_tech_request_context->get_skip( ).
+    lv_max_hits = lv_top + lv_skip.
+
+    " Get Count Flag and Data Flag...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    if io_tech_request_context->has_count( ) is not initial.
+      lv_count_flag = abap_true.
+      lv_data_flag  = abap_false.
+    elseif io_tech_request_context->has_inlinecount( ). "data + counters
+      lv_count_flag = abap_true.
+      lv_data_flag  = abap_true.
+    else. "standard query, no counters
+      lv_count_flag = abap_false.
+      lv_data_flag  = abap_true.
+    endif.
+
+    " Add key fields...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_select[] = build_select_table( io_tech_request_context = cast #( io_tech_request_context )
+                                      iv_cds_view             = lv_cds_view
+                                      iv_key_fields_only      = abap_true ).
+
+
+    " Get Order By...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lt_order_by = build_order_by_table( iv_cds_view             = lv_cds_view
+                                        io_tech_request_context = cast #( io_tech_request_context ) ).
+
+
+    " Perform Selection...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    get_cds_data( exporting  iv_cds_view              = lv_cds_view
+                             it_filter_select_options = lt_select_options
+                             iv_filter_string         = lv_filter_string
+                             it_select                = lt_select
+                             it_order_by              = lt_order_by
+                             iv_max_hits              = conv #( lv_max_hits )
+                             iv_distinct              = abap_true
+                             iv_data                  = lv_data_flag
+                             iv_count                 = lv_count_flag
+                   importing ev_count                 = lv_count
+                   changing  ct_data                  = ct_entity_set ).
+
+    " Counters...
+    if lv_count_flag = abap_true.
+      cs_response_context-inlinecount = lv_count.
+      cs_response_context-count       = lv_count.
+    endif.
+
+    " Check Skip...
+    if ct_entity_set is not initial.
+      if lv_skip > 0.
+        delete ct_entity_set[] from 1 to lv_skip.
+      endif.
+    endif.
+
+  endmethod.
+
+
+  method get_converted_filter_string.
+
+    data: lo_req_filter     type ref to /iwbep/cl_mgw_req_filter.
+    data: lo_filter_expr    type ref to /iwbep/cl_mgw_filter_exprsn.
+
+    data(lr_request)         = cast /iwbep/cl_mgw_request( io_tech_request_context ).
+    data(ls_details)         = lr_request->get_request_details( ).
+    data(lt_filter_expr)     = ls_details-technical_request-filter_expressions[].
+    data(lt_filter_func)     = ls_details-technical_request-filter_functions[].
+
+    " Convert Select Option...
+    zscl_odata_tools=>convert_select_options( exporting iv_name = iv_cds_name
+                                              changing ct_filter_expressions = lt_filter_expr ).
+
+    " Convert Operators for ABAP and Native SQL...
+    loop at lt_filter_expr assigning field-symbol(<fs_filter_expr>).
+      case to_upper( <fs_filter_expr>-operator ).
+        when 'EQ'. <fs_filter_expr>-operator = '='.
+        when 'GT'. <fs_filter_expr>-operator = '>'.
+        when 'LT'. <fs_filter_expr>-operator = '<'.
+        when 'GE'. <fs_filter_expr>-operator = '>='.
+        when 'LE'. <fs_filter_expr>-operator = '<='.
+        when 'NE'. <fs_filter_expr>-operator = '<>'.
+      endcase.
+
+      " Check Field...
+      if check_field_( iv_table = conv #( iv_cds_name )
+                       iv_field = <fs_filter_expr>-l_oprnd_int )  is initial.
+        continue.
+      endif.
+    endloop.
+
+    " Create Objects...
+    lo_req_filter ?= io_tech_request_context->get_filter( ).
+    create object lo_filter_expr
+      exporting
+        it_expressions = lt_filter_expr
+        it_functions   = lt_filter_func
+        io_req_filter  = lo_req_filter.
+
+    " Get Filter String...
+    rv_filter_string = lo_filter_expr->get_expression_string( ).
+
+
+  endmethod.
+
+
+  method get_expanded_entityset.
+
+    " Get Children -> needed for All...
+    data: lr_dpc_obj                type ref to object.
+    data: lt_children               type /iwbep/if_mgw_odata_expand=>ty_t_node_children.
+    data: lr_child                  type ref to /iwbep/cl_mgw_expand_node.
+    data: lt_key_tab                type /iwbep/t_mgw_name_value_pair.
+    data: lo_expand                 type ref to /iwbep/cl_mgw_expand_node.
+    data: lv_exp_cnt                type i.
+    data: lt_expanded_clauses	      type string_table.
+    data: lt_expanded_tech_clauses  type string_table.
+
+    field-symbols: <fs_dpc_obj>       type any,
+                   <fs_children>      like line of lt_children,
+                   <fs_table>         type standard table,
+                   <fs_line>          type any,
+                   <fs_component_tab> type standard table,
+                   <fs_component_str> type any.
+
+    try.
+        assign er_entityset->* to <fs_table>.
+        lo_expand ?= io_expand.
+        lt_children = lo_expand->/iwbep/if_mgw_odata_expand~get_children( ).
+        data(lv_nav_prop_name) = lo_expand->/iwbep/if_mgw_tech_expand_node~get_nav_prop_name( ).
+      catch cx_root.
+        " Through Error Message for UI5 Application to show "no auth"
+        raise exception type /iwbep/cx_mgw_tech_exception
+          exporting
+            textid      = /iwbep/cx_mgw_tech_exception=>wrong_data_container
+            entity_type = iv_entity_name.
+    endtry.
+
+
+    " Get Parent Entity Set...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    data: lo_request_context type ref to /iwbep/cl_mgw_request.
+    data: ls_request         type        /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+    data: lr_request         type ref to /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+
+    field-symbols:
+          <ls_request>       type /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+
+    " Get Data if Initial...
+    if <fs_table> is initial.
+      lo_request_context ?= io_tech_request_context.
+      ls_request = lo_request_context->get_request_details( ).
+      clear ls_request-if_modified_since.
+
+      assign ls_request to <ls_request>.
+      get reference of <ls_request> into lr_request.
+
+      create object lo_request_context
+        exporting
+          ir_request_details = lr_request
+          it_headers         = ls_request-technical_request-request_header
+          io_model           = get_service_model( lo_request_context ).
+
+      call method io_data_provider->get_entityset
+        exporting
+          iv_entity_name           = iv_entity_name
+          iv_entity_set_name       = iv_entity_set_name
+          iv_source_name           = iv_source_name
+          it_navigation_path       = it_navigation_path
+          is_paging                = is_paging
+          it_order                 = it_order
+          it_filter_select_options = it_filter_select_options
+          it_key_tab               = it_key_tab
+          iv_filter_string         = iv_filter_string
+          iv_search_string         = iv_search_string
+          io_tech_request_context  = cast #( lo_request_context )
+        importing
+          er_entityset             = data(lr_entityset)
+          es_response_context      = data(ls_response_context).
+
+      " For Generic Expand only: data must always be returned, so is_not_modified  may not be set to TRUE
+      if ls_response_context-is_not_modified eq /iwbep/if_mgw_appl_types=>gcs_modification_status-is_not_modified.
+        raise exception type /iwbep/cx_mgw_busi_exception
+          exporting
+            textid      = /iwbep/cx_mgw_busi_exception=>is_not_modified_expand
+            sap_note_id = /iwbep/cl_mgw_abs_data=>gc_note_id_cache_control.
+      endif.
+
+      " Add skiptoken to current expand if Framework Expand
+      if ls_response_context-skiptoken is not initial.
+        append ls_response_context-skiptoken to ls_response_context-expand_skiptokens.
+      endif.
+
+      " Collect data for Expand...
+      """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+      field-symbols: <fs_entityset> type standard table.
+      if lr_entityset is bound.
+        assign lr_entityset->* to <fs_entityset>.
+        loop at <fs_entityset> assigning field-symbol(<fs_entity>).
+          append initial line to <fs_table> assigning <fs_line>.
+          move-corresponding: <fs_entity> to <fs_line>.
+        endloop.
+      endif.
+    else.
+      " Store Data if not Initial...
+      lr_entityset = er_entityset.
+    endif.
+
+    " Expand to children...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    loop at lt_children assigning <fs_children>.
+      lr_child ?= <fs_children>-node.
+      check lr_child is bound.
+
+      " Work only with Main Entity...
+      check: iv_entity_name = iv_source_name.
+
+      " Check Navigation Properties...
+      call method _get_navigation_properties_
+        exporting
+          io_tech_request_context = cast #( io_tech_request_context )
+          iv_principal_et         = iv_source_name
+          iv_dependent_et         = lr_child->get_entity_type( )
+        importing
+          et_nav_props            = data(lt_nav_props).
+      if lines( lt_nav_props[] ) > 1 or lines( lt_nav_props[] ) = 0.
+        continue.
+      endif.
+
+      " Expand Entity Set Generic
+      call method expand_generic_entity_set
+        exporting
+          io_tech_request_context = cast #( io_tech_request_context )
+          io_expand_node          = lr_child
+          io_data_provider        = io_data_provider
+        changing
+          ct_data                 = <fs_table>
+          ct_expanded_properties  = lt_expanded_tech_clauses.
+
+      " Expand Returned Data...
+      lr_entityset = er_entityset.
+    endloop. " loop at lt_children...
+
+
+    " Did we finish with expand ?
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    loop at lt_children assigning <fs_children>.
+      lr_child ?= <fs_children>-node.
+      check lr_child is bound.
+      if lr_child->is_expanded( ).
+        add 1 to lv_exp_cnt.
+      endif.
+    endloop.
+    if lines( lt_children[] ) = lv_exp_cnt.
+      lo_expand->set_is_expanded( abap_true ).
+    endif.
+
+
+    " Continue with Standard Processing...
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    er_entityset             = lr_entityset.
+    et_expanded_clauses      = lt_expanded_clauses.
+    et_expanded_tech_clauses = lt_expanded_tech_clauses.
+    es_response_context      = ls_response_context.
+
+
+  endmethod.
+
+
+  method get_key_fields_.
+
+    data: ls_x030l   type x030l.
+    data: lt_x031lb  type table of x031l.
+    data: lt_dfies   type table of dfies.
+
+
+    call function 'DDIF_NAMETAB_GET'
+      exporting
+        tabname   = iv_cds_view
+      importing
+        x030l_wa  = ls_x030l
+      tables
+        x031l_tab = lt_x031lb
+        dfies_tab = lt_dfies
+      exceptions
+        not_found = 1
+        others    = 2.
+    if sy-subrc <> 0.
+      return.
+    endif.
+
+    loop at lt_dfies assigning field-symbol(<fs_dfies>)
+      where keyflag = abap_true
+        and datatype <> 'CLNT'.
+      append <fs_dfies>-fieldname to rt_key_fields[].
+    endloop.
+
+
+
+  endmethod.
+
+
+  method get_service_model.
+
+    statics: so_model        type ref to /iwbep/cl_mgw_odata_model,
+             sv_service_name type string,
+             sv_namespace    type string,
+             sv_version      type /iwbep/med_mdl_version.
+
+    data: ls_req_data          type        /iwbep/if_mgw_core_srv_runtime=>ty_s_mgw_request_context.
+    data: lo_metadata_provider type ref to /iwbep/if_mgw_med_provider.
+    data: lv_class             type        string.
+    data: lv_method            type        string.
+
+    " Get Request Data...
+    ls_req_data = io_tech_request_context->get_request_details( ).
+
+    " Somehow the Service Name is not provided...
+    if ls_req_data-service_doc_name is initial.
+      data(lr_hlp)   = /iwbep/cl_mgw_med_dba_factory=>get_med_provider( ).
+      data(lt_srv)   = lr_hlp->get_model_groups( ).
+      data(lt_stack) = cl_abap_get_call_stack=>format_call_stack_with_struct(
+                       cl_abap_get_call_stack=>get_call_stack( ) ).
+      loop at lt_stack into data(ls_stack).
+        clear: lv_class, lv_method.
+        split ls_stack-event at '=>' into lv_class lv_method.
+        if lv_class is not initial.
+          read table lt_srv into data(ls_srv) with key class_name = lv_class. "#EC CI_SORTSEQ
+          if sy-subrc = 0.
+            ls_req_data-service_doc_name = ls_srv-technical_name.
+            ls_req_data-version          = ls_srv-version.
+            ls_req_data-namespace        = ls_srv-namespace.
+            exit.
+          endif.
+        endif.
+      endloop.
+    endif.
+
+
+    " Check Buffer...
+    if sv_service_name = ls_req_data-service_doc_name and
+       sv_namespace    = ls_req_data-namespace        and
+       sv_version      = ls_req_data-version          and
+       so_model        is not initial                 and
+       so_model        is bound.
+      ro_model = so_model.
+    else.
+
+      " Read it new...
+      lo_metadata_provider = /iwbep/cl_mgw_med_provider=>get_med_provider( ).
+
+      so_model ?= lo_metadata_provider->get_service_model(
+                    iv_svc_ext_name           = ls_req_data-service_doc_name
+                    iv_svc_namespace          = ls_req_data-namespace
+                    iv_svc_version            = ls_req_data-version
+                    iv_do_check_for_extension = abap_true
+                   ).
+      if so_model is bound.
+        ro_model        = so_model.
+        sv_service_name = ls_req_data-service_doc_name.
+        sv_namespace    = ls_req_data-namespace.
+        sv_version      = ls_req_data-version.
+      endif.
+    endif.
+  endmethod.
+
+
+  method get_so_from_navigation.
+
+    data: lr_source_et  type ref to data.
+    data: lr_converter  type ref to /iwbep/if_mgw_req_key_convert.
+    data: lv_structure  type string.
+
+    field-symbols: <fs_any> type any.
+
+    try.
+        data(ls_details)     = io_tech_request_context->get_request_details( ).
+        data(lt_navigation)  = ls_details-technical_request-navigation_path[].
+
+        check: ls_details-technical_request-target_entity_type ne
+               ls_details-technical_request-source_entity_type.
+
+        read table lt_navigation into data(ls_navigation)
+         with key target_entity_type = ls_details-technical_request-target_entity_type.
+        check: sy-subrc = 0.
+
+
+        " Create Source Entity Structure...
+        lv_structure = _get_ddic_structure_for_et_( io_tech_request_context = io_tech_request_context
+                                                    iv_entity_type_name     = conv #( ls_navigation-source_entity_type ) ).
+
+        create data lr_source_et type (lv_structure).
+        assign lr_source_et->* to field-symbol(<fs_entity>).
+
+        " Convert Source Keys...
+        lr_converter ?= ls_navigation-key_converter.
+        if lr_converter is bound.
+          lr_converter->execute( exporting it_tech_pair  = ls_details-technical_request-key_tab[]
+                                 importing es_key_values = <fs_entity> ).
+        else.
+          loop at ls_details-technical_request-key_tab[] into data(ls_key).
+            assign component ls_key-name of structure <fs_entity> to <fs_any>.
+            if sy-subrc = 0.
+              <fs_any> = ls_key-value.
+            endif.
+          endloop.
+        endif.
+
+        " Get Navigation Properties...
+        _get_navigation_properties_( exporting io_tech_request_context = io_tech_request_context
+                                               iv_principal_et = conv #( ls_navigation-source_entity_type )
+                                               iv_dependent_et = conv #( ls_navigation-target_entity_type )
+                                     importing et_nav_props    = data(lt_nav_prop) ) .
+
+        " Build Select Options Table...
+        loop at lt_nav_prop into data(ls_nav_prop).
+          assign component ls_nav_prop-principal_field of structure <fs_entity> to field-symbol(<key_field_value>).
+          if sy-subrc = 0.
+            append value #( property       = ls_nav_prop-dependent_field
+                            select_options = value #( ( sign = 'I' option = 'EQ' low = <key_field_value> ) )
+                          ) to rt_select_options[].
+          endif.
+        endloop.
+
+
+      catch cx_root.
+    endtry.
+
+  endmethod.
+
+
+  method get_text_from_key.
+
+    data: lt_lines    type table of tline.
+    data: lt_strings  type string_table.
+
+    call function 'READ_TEXT'
+      exporting
+        id                      = iv_id
+        language                = iv_spras
+        name                    = iv_name
+        object                  = iv_object
+      tables
+        lines                   = lt_lines
+      exceptions
+        id                      = 1
+        language                = 2
+        name                    = 3
+        not_found               = 4
+        object                  = 5
+        reference_check         = 6
+        wrong_access_to_archive = 7
+        others                  = 8.
+    if sy-subrc <> 0.
+      return.
+    endif.
+
+    if lt_lines is not initial.
+      call function 'CONVERT_ITF_TO_STREAM_TEXT'
+        exporting
+          language     = iv_spras
+          lf           = 'X'
+        importing
+          stream_lines = lt_strings
+        tables
+          itf_text     = lt_lines.
+
+      if lt_strings is not initial.
+        " concatenate lines of lt_strings into ev_text separated by space.
+        concatenate lines of lt_strings into ev_text separated by cl_abap_char_utilities=>cr_lf.
+      endif.
+    endif.
+
+
+
+  endmethod.
+
+
+  method implement_filtering.
+
+    data: lt_select_options type /iwbep/t_mgw_select_option.
+
+    if ct_data[] is initial or it_select_options[] is initial.
+      return.
+    endif.
+
+    lt_select_options[] = it_select_options[].
+
+    read table ct_data[] index 1 assigning field-symbol(<fs_data>).
+    if <fs_data> is assigned.
+
+      " First, do INPUT conversion...
+      convert_select_options( exporting iv_structure      = <fs_data>
+                              changing  ct_select_options = lt_select_options[] ).
+
+      " Then, perform filtering...
+      /iwbep/cl_mgw_data_util=>filtering( exporting it_select_options = lt_select_options
+                                          changing  ct_data           = ct_data ).
+    endif.
+
+  endmethod.
+
+
+  method implement_orderby.
+
+    data: lt_order type /iwbep/t_mgw_sorting_order.
+
+    if it_order is supplied.
+      move-corresponding: it_order[]      to lt_order[].
+    elseif it_order_tech is supplied.
+      move-corresponding: it_order_tech[] to lt_order[].
+    else.
+      return.
+    endif.
+
+    call method /iwbep/cl_mgw_data_util=>orderby
+      exporting
+        it_order = lt_order
+      changing
+        ct_data  = ct_data.
+
+
+  endmethod.
+
+
+  method implement_paging.
+
+    call method /iwbep/cl_mgw_data_util=>paging
+      exporting
+        is_paging = is_paging
+      changing
+        ct_data   = ct_data.
+
+  endmethod.
+
+
+  method is_field_requested.
+
+    data(ls_details) = io_tech_request_context->get_request_details( ).
+    data(lt_select)  = ls_details-technical_request-select_strings[].
+
+    " Rule: $select is initial => select all...
+    if lt_select[] is initial.
+      rv_ok = abap_true.
+      return.
+    endif.
+
+    " Single Field...
+    if iv_field is not initial.
+      read table lt_select transporting no fields
+        with key table_line = iv_field.
+      if sy-subrc = 0.
+        rv_ok = abap_true.
+      endif.
+      return.
+
+      " Field list.. ( operand OR)
+    elseif it_fields[] is not initial.
+      loop at it_fields into data(lv_field).
+        read table lt_select transporting no fields
+       with key table_line = lv_field.
+        if sy-subrc = 0.
+          rv_ok = abap_true.
+        endif.
+      endloop.
+
+      return.
+    endif.
+
+
+  endmethod.
+
+
+  method raise_exception.
+    case abap_true.
+      when iv_busi.
+        raise exception type /iwbep/cx_mgw_busi_exception
+          exporting
+            textid = value #( msgid = sy-msgid
+                              msgno = sy-msgno
+                              attr1 = sy-msgv1
+                              attr2 = sy-msgv2
+                              attr3 = sy-msgv3
+                              attr4 = sy-msgv4
+                             ).
+      when iv_tech.
+        raise exception type /iwbep/cx_mgw_tech_exception
+          exporting
+            textid = value #( msgid = sy-msgid
+                              msgno = sy-msgno
+                              attr1 = sy-msgv1
+                              attr2 = sy-msgv2
+                              attr3 = sy-msgv3
+                              attr4 = sy-msgv4
+                             ).
+    endcase.
+  endmethod.
+
+
+  method remove_duplicates_by_key_.
+
+    data: lt_key_fields   type string_table.
+    data: lr_standard_tab type ref to data.
+    data: lr_sorted_tab   type ref to data.
+    data: lr_linetype     type ref to cl_abap_structdescr.
+    data: lr_tabletype    type ref to cl_abap_tabledescr.
+    data: lt_key          type abap_keydescr_tab.
+    data: lv_idx          type i.
+
+    field-symbols: <fs_standard_tab> type standard table.
+    field-symbols: <fs_sorted_tab>   type sorted table.
+    field-symbols: <fs_line>         type any.
+
+    lt_key_fields[] = get_key_fields_( iv_cds_view ).
+    check lt_key_fields[] is not initial.
+
+    create data lr_standard_tab like ct_data.
+    assign lr_standard_tab->* to <fs_standard_tab>.
+    move-corresponding: ct_data to <fs_standard_tab>.
+    check <fs_standard_tab> is not initial.
+
+    read table <fs_standard_tab> assigning <fs_line> index 1.
+    check <fs_line> is assigned.
+
+    " Create Sorted Table...
+    append lines of lt_key_fields[] to lt_key[].
+    lr_linetype ?= cl_abap_structdescr=>describe_by_data( <fs_line> ).
+    lr_tabletype = cl_abap_tabledescr=>create(
+                   p_line_type  = lr_linetype
+                   p_table_kind = cl_abap_tabledescr=>tablekind_sorted
+                   p_unique     = abap_true
+                   p_key        = lt_key ).
+
+    create data lr_sorted_tab type handle lr_tabletype.
+    assign lr_sorted_tab->* to <fs_sorted_tab>.
+
+    loop at <fs_standard_tab> assigning <fs_line>.
+      lv_idx = sy-tabix.
+      read table <fs_sorted_tab> from <fs_line> transporting no fields. " Read done by key
+      if sy-subrc <> 0.
+        insert <fs_line> into table <fs_sorted_tab>.
+      else.
+        delete <fs_standard_tab> index lv_idx.
+      endif.
+    endloop.
+
+    ct_data[] = <fs_standard_tab>[].
+
+  endmethod.
+
+
+  method _get_ddic_structure_for_et_.
+
+    " Get DDIC Structure for Entity Type...
+    clear: rv_structure_name.
+
+    data(lr_model) = get_service_model( io_tech_request_context ).
+    check: lr_model is bound.
+
+    data(lt_entity_types) = lr_model->/iwbep/if_mgw_odata_re_model~get_entity_types( ).
+    read table lt_entity_types into data(ls_entity) with key name = iv_entity_type_name.
+    if sy-subrc = 0.
+      call function 'DDIF_NAMETAB_GET'
+        exporting
+          tabname   = conv ddobjname( ls_entity-attribute_struct )
+          all_types = abap_true
+        exceptions
+          not_found = 1
+          others    = 2.
+      if sy-subrc = 0.
+        rv_structure_name = ls_entity-attribute_struct.
+      endif.
+    endif.
+
+  endmethod.
+
+
+  method _get_es_by_et_.
+    " Get Entity St by Entity Type...
+
+    clear: rv_es_name.
+
+    data(lr_model) = get_service_model( io_tech_request_context ).
+    check: lr_model is bound.
+
+    data(lt_entity_types) = lr_model->/iwbep/if_mgw_odata_re_model~get_entity_types( ).
+    read table lt_entity_types into data(ls_entity) with key name = iv_et_name.
+    if sy-subrc = 0.
+      if ls_entity-set_names[] is not initial.
+        rv_es_name = ls_entity-set_names[ 1 ].
+      endif.
+    endif.
+
+  endmethod.
+
+
+  method _get_navigation_properties_.
+    " Get Navigation Properties...
+    clear: et_nav_props[].
+
+    data: ls_nav_prop like line of et_nav_props[].
+
+    clear: et_nav_props[].
+
+    data(lr_model) = get_service_model( io_tech_request_context ).
+    check: lr_model is bound.
+
+    try.
+        data(lr_principal) = lr_model->/iwbep/if_mgw_odata_re_model~get_entity_type( conv #( iv_principal_et ) ).
+        check: lr_principal is bound.
+
+        " => Entity Names...
+        ls_nav_prop-principal_entity = iv_principal_et.
+        ls_nav_prop-dependent_entity = iv_dependent_et.
+
+        " Navigation Properties...
+        data(lt_nav_props) = lr_principal->get_navigation_properties( ).
+        loop at lt_nav_props assigning field-symbol(<fs_nav_prop>).
+          data(lr_nav_prop) = cast /iwbep/cl_mgw_odata_nav_prop( <fs_nav_prop>-navigation_property ).
+          check: lr_nav_prop is bound.
+
+          " Association...
+          data(lr_association) = lr_nav_prop->/iwbep/if_mgw_odata_re_navprop~get_association( ).
+          check: lr_association is bound.
+
+          " Get Dependent...
+          data(lr_dependent)  = lr_association->get_right_entity_type( ).
+          check: lr_dependent->get_name( ) = iv_dependent_et.
+
+          " => Structures...
+          ls_nav_prop-dependent_structure = lr_dependent->get_structure( ).
+          ls_nav_prop-principal_structure = lr_principal->get_structure( ).
+
+          " Constraints...
+          data(lt_constr)    = lr_association->get_ref_constraints( ).
+          loop at lt_constr into data(ls_constr).
+
+            " => Properties...
+            ls_nav_prop-principal_property = ls_constr-source_property-external_name.
+            ls_nav_prop-dependent_property = ls_constr-target_property-external_name.
+
+            " => Fields...
+            ls_nav_prop-principal_field = ls_constr-source_property-name.
+            ls_nav_prop-dependent_field = ls_constr-target_property-name.
+
+            append ls_nav_prop to et_nav_props[].
+          endloop.
+        endloop.
+      catch cx_root into data(lx_root).
+        raise exception type /iwbep/cx_mgw_tech_exception
+          exporting
+            previous = lx_root.
+    endtry.
+
+  endmethod.
+ENDCLASS.
